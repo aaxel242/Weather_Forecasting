@@ -1,0 +1,15 @@
+https://x-y.es/aemet/est-0201D-barcelona-cmt
+
+https://x-y.es/aemet/prov-barcelona#indice4
+
+https://www.aemet.es/es/serviciosclimaticos/datosclimatologicos/valoresclimatologicos?k=cat&p=08&l=0200E
+
+https://www.meteoblue.com/es/server/queue/status?id=1934F4D9-1945-423D-90C3-1254A1402F42
+
+https://www.meteoblue.com/es/tiempo/historyclimate/climatemodelled/barcelona_espa%C3%B1a_3128760
+
+- https://oneweather.org/archive/
+
+- https://www.meteo.cat/wpweb/climatologia/el-clima/climatologies-xema/
+
+https://www.kaggle.com/code/ahmedwaelz/weather-in-spain-preprocessing-timeseries/output

@@ -1,0 +1,52 @@
+2025
+  "datos" : "https://opendata.aemet.es/opendata/sh/13509676",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/ce519140",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2024
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/cdbc9ba8",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/98eb59d9",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2023
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/142c7571",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/694a7363",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2022
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/dca03680",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/074acdba",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2021
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/7bbe9382",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/17776dad",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2020
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/1378e6c4",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/4eb93f9f",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2019
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/91a5dc34",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+

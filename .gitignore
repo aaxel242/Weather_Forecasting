@@ -1,0 +1,18 @@
+# Entorno virtual
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Configuración de IDE
+.vscode/
+.idea/
+
+# Archivos de entorno
+.env
+*.env
+
+# Mac / Windows basura
+.DS_Store
+Thumbs.db

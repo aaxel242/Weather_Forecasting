@@ -1,0 +1,29 @@
+2025 – 07 – 01 a 2025 - 12 - 03
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/f324cc42",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2025 - 01 - 01  a 2025 - 06 - 30
+
+"datos" : "https://opendata.aemet.es/opendata/sh/c115a398",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2024 – 07 – 01   a 2024 – 12 – 31 
+  "datos" : "https://opendata.aemet.es/opendata/sh/b9d3b490",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2024 - 01 - 01 a  2024 - 06 - 30
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/74838f0b",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2023 
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/c07a75f4",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28
+
+  "datos" : "https://opendata.aemet.es/opendata/sh/e6308948",
+  "metadatos" : "https://opendata.aemet.es/opendata/sh/b3aa9d28"
+
+2022
+
