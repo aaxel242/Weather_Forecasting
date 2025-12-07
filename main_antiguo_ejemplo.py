@@ -5,10 +5,10 @@ import streamlit as st
 from pathlib import Path 
 import pandas as pd
 
-from scripts.download_data import download_Data
-from scripts.correlation import correlation
-from scripts.prediction import prediction_model_train
-from scripts.show_data import show_data
+#from scripts.download_data import download_Data
+#from scripts.correlation import correlation
+#from scripts.prediction import prediction_model_train
+from src.scripts.show_data import show_data
 
 # guardamos los datos en la carpeta
 # Load data

@@ -35,3 +35,5 @@ models = [
     "lightgbm>=4.0.0",
     "tensorflow>=2.13.0",
 ]
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
