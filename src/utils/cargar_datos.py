@@ -11,7 +11,7 @@ def cargar_datos():
     data = None
 
     # CSV definitivo (base)
-    ruta_csv_default = os.path.join("src", "datos", "csv", "data_weather.csv")
+    ruta_csv_default = os.path.join("src", "data", "processed", "data_weather.csv")
     if os.path.exists(ruta_csv_default):
         data = pd.read_csv(ruta_csv_default)
         st.info("📂 Usando datos compilados (CSV definitivo) como base.")

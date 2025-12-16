@@ -1,6 +1,6 @@
 import streamlit as st
 
-from visualization.visualize_data import visualization_Data
+from utils.visualize_data import visualization_Data
 
 def basic_stats (data):
     # 1. Resumen general
