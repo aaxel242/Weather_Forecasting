@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import prophet as prophet
 
 from scipy.stats import kendalltau, pearsonr, spearmanr

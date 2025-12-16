@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 import streamlit as st
 import prophet as prophet
 
@@ -29,7 +27,7 @@ def correlation(data):
     p_values = []
     p_values = correlation_pvalue_matrix(data)
 
-    with st.expander(f"Valores p"):
+    with st.expander("Valores p"):
         st.dataframe(p_values, use_container_width=True)
 
     # prediction_model(data)

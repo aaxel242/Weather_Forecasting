@@ -1,6 +1,5 @@
 import streamlit as st
 import prophet as prophet
-import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import mean_absolute_error

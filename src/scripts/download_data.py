@@ -1,8 +1,5 @@
-import sys
 import os
-import matplotlib.pyplot as plt
 import streamlit as st
-from pathlib import Path 
 import pandas as pd
 
 st.title("Show Data Analyst")
