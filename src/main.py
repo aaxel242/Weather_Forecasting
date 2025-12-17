@@ -40,8 +40,6 @@ def main():
         data_clean = limpiar_datos(data)        
         data_imput = imputar_datos(data_clean)  
                
-        with st.expander("Vista previa de la tabla de datos limpia e imputada"):
-            st.dataframe(data_imput)
         eda_interactivo(data_imput)
         
         # Botón opcional para guardar CSV limpio
