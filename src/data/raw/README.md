@@ -15,3 +15,4 @@
 | **horaHrMax** | Hora en la que ocurrió la humedad máxima.                                                     |
 | **hrMin**     | Mínima humedad relativa del día (%).                                                          |
 | **horaHrMin** | Hora en la que ocurrió la humedad mínima.                                                     |
+

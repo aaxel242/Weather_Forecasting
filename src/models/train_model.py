@@ -90,3 +90,6 @@ def train_classifier_model(
     predictions = pd.Series(model.predict(X_test), index=y_test.index)
 
     return model, predictions
+
+def load_trained_model_precipitation(model_path: str) -> RandomForestRegressor:
+    return joblib.load(model_path)
