@@ -25,12 +25,9 @@ def add_binari_precipitation():
     df.to_csv('src/data/raw/data_binario.csv', index=False)
 
 def add_lag_features():
-    import pandas as pd
 
-    # Cargar CSV
     df = pd.read_csv("src/data/raw/data_binario.csv")
 
-    # Asegurar formato de fecha
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
 
@@ -40,7 +37,7 @@ def add_lag_features():
     df["mes"] = df["date"].dt.month
     df["dia_del_anio"] = df["date"].dt.dayofyear
     df["semana"] = df["date"].dt.isocalendar().week.astype(int)
-    df["es_fin_de_semana"] = df["date"].dt.weekday >= 5
+    df["es_fin_de_semana"] = (df["date"].dt.weekday >= 5).astype(int)
 
     # ============================
     # 2. LAGS
@@ -64,16 +61,16 @@ def add_lag_features():
     df["temp_max_target"] = df["tmax"].shift(-7)
     df["temp_min_target"] = df["tmin"].shift(-7)
     df["precipitacion_target"] = df["prec"].shift(-7)
-
     df["lluvia_binaria_target"] = df["bin_prep"].shift(-7)
 
     # ============================
-    # 5. RELLENAR NULOS DE LAGS Y ROLLING
+    # 5. IMPUTACIÓN DE FEATURES
     # ============================
-    df = df.interpolate(method="linear")  # o df.ffill()
-
-    # 5.2 Si aún quedan nulos, rellenar con la media de cada columna 
+    df = df.interpolate(method="linear")
     df = df.fillna(df.mean(numeric_only=True))
+
+    # Booleanos
+    df["es_fin_de_semana"] = df["es_fin_de_semana"].fillna(0).astype(int)
 
     # ============================
     # 6. ELIMINAR SOLO NULOS DE TARGETS
@@ -83,7 +80,7 @@ def add_lag_features():
         "temp_min_target",
         "precipitacion_target",
         "lluvia_binaria_target"
-    ])
+    ]).reset_index(drop=True)
 
     df.to_csv("src/data/processed/data_weather_final.csv", index=False)
 
