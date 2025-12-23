@@ -14,7 +14,6 @@ def cargar_datos():
     ruta_csv_default = os.path.join("src", "data", "processed", "data_weather_final.csv")
     if os.path.exists(ruta_csv_default):
         data = pd.read_csv(ruta_csv_default)
-        st.info("📂 Usando datos compilados (CSV definitivo) como base.")
     else:
         st.warning("⚠️ No se encontró el CSV definitivo. Compila los datos primero.")
         data = pd.DataFrame()  # vacío para poder concatenar si hay uploader

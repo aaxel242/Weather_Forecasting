@@ -84,4 +84,6 @@ def add_lag_features():
 
     df.to_csv("src/data/processed/data_weather_final.csv", index=False)
 
-add_lag_features()
+df = pd.read_csv("src/data/processed/data_weather_final.csv")
+df = df.drop(columns=["precipitacion_target"])
+df.to_csv("src/data/processed/data_weather_final.csv", index=False)
