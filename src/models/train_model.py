@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-def train_classifier_model_LR(features, labels, split_factor=0.8, model_path="src/models/trained_classifier.pkl"):
+def train_classifier_model_LR(features, labels, split_factor=0.8, model_path="src/models/trained_classifier_lr.pkl"):
     # Convertimos labels a entero para evitar problemas de tipos
     labels = labels.astype(int)
     
@@ -26,7 +26,7 @@ def train_classifier_model_LR(features, labels, split_factor=0.8, model_path="sr
     predictions = pd.Series(model.predict(X_test), index=y_test.index)
     return model, predictions
 
-def train_classifier_model_RF(features, labels, split_factor=0.8, model_path="src/models/trained_classifier.pkl"):
+def train_classifier_model_RF(features, labels, split_factor=0.8, model_path="src/models/trained_classifier_rf.pkl"):
     # Convertimos labels a entero para evitar problemas de tipos
     labels = labels.astype(int)
     
@@ -44,3 +44,10 @@ def train_classifier_model_RF(features, labels, split_factor=0.8, model_path="sr
     
     predictions = pd.Series(model.predict(X_test), index=y_test.index)
     return model, predictions
+
+def train_models (features, labels, model_path_rf, model_path_lr):
+
+    model_rf, y_pred_rf = train_classifier_model_RF(features, labels, model_path=model_path_rf)
+    model_lr, y_pred_lr = train_classifier_model_LR(features, labels, model_path=model_path_lr)
+
+    return model_rf, y_pred_rf, model_lr, y_pred_lr

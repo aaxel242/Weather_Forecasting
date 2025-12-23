@@ -1,4 +1,3 @@
-import joblib
 import streamlit as st
 import os
 import pandas as pd
@@ -7,10 +6,10 @@ from PIL import Image
 from utils.cargar_datos import cargar_datos
 from utils.limpieza import limpiar_datos
 from utils.imputar_datos import imputar_datos
-from scripts.eda import eda_interactivo
-from models.prediccion import predict_with_model
-from models.train_model import train_classifier_model_LR, train_classifier_model_RF
+
+from models.train_model import train_models
 from models.evaluation import evaluate_classification
+from models.prediccion import predict_with_model
 
 def main():
     # Imagen de inicio
@@ -39,24 +38,16 @@ def main():
             leaky = [target_column_prep, "date"]
             features = data_imput.drop(columns=[c for c in leaky if c in data_imput.columns], errors='ignore')
             
-            # 2. CONVERSIÓN CRÍTICA A ENTERO
             labels = data_imput[target_column_prep].astype(float).astype(int)
-            # SELECCIÓN DE MÉTODO
+
             model_path = f"src/models/"
             model_path_rf = f"{model_path}/model_lluvia_rf.pkl"
             model_path_lr = f"{model_path}/model_lluvia_lr.pkl"
 
-            # BOTÓN ENTRENAR
-            
-            train_classifier_model_RF(features, labels, model_path=model_path_rf)
-            train_classifier_model_LR(features, labels, model_path=model_path_lr)
+            model_rf, y_pred_rf, model_lr, y_pred_lr = train_models(features, labels, model_path_rf, model_path_lr)
 
-            # BOTÓN EVALUAR
-            model_rf, y_pred_rf = train_classifier_model_RF(features, labels, model_path=model_path_rf)
-            model_lr, y_pred_lr = train_classifier_model_LR(features, labels, model_path=model_path_lr)
             y_true = labels.iloc[int(len(labels) * 0.8):]
-            metrics_rf = evaluate_classification(y_true, y_pred_rf)
-            metrics_lr = evaluate_classification(y_true, y_pred_lr)
+            evaluate_classification(y_true, y_pred_rf, y_pred_lr)
             
             predict_with_model(model_path_lr, model_path_rf, features, rango)
 
