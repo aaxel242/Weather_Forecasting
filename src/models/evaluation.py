@@ -1,137 +1,41 @@
-# import pickle
-# import pandas as pd
-# from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-# def evaluar_modelo(df: pd.DataFrame, target_column="tmed"):
-#     """
-#     Evalúa el modelo guardado en disco usando los datos actuales.
-#     """
-
-#     with open("models/saved/model.pkl", "rb") as f:
-#         model = pickle.load(f)
-
-#     with open("models/saved/scaler.pkl", "rb") as f:
-#         scaler = pickle.load(f)
-
-#     X = df.drop(columns=[target_column])
-#     y = df[target_column]
-
-#     X_scaled = scaler.transform(X)
-#     preds = model.predict(X_scaled)
-
-#     mae = mean_absolute_error(y, preds)
-#     rmse = mean_squared_error(y, preds, squared=False)
-#     r2 = r2_score(y, preds)
-
-#     metrics = {
-#         "MAE": mae,
-#         "RMSE": rmse,
-#         "R2": r2
-#     }
-
-#     return metrics, preds
-
-from typing import Any
-
 import numpy as np
 import pandas as pd
+import streamlit as st
 from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
-    f1_score,
-    mean_absolute_error,
-    mean_squared_error,
-    precision_score,
-    r2_score,
-    recall_score,
-    roc_auc_score,
+    accuracy_score, precision_score, recall_score
 )
 
-# =========================================================
-#   CLASSIFICATION METRICS
-# =========================================================
+def evaluate_classification(y_true, y_pred_rf, y_pred_lr):
+    # Forzamos conversión a entero para evitar el error de '0.0' vs 0
+    y_true = np.array(y_true).astype(int)
+    y_pred_rf = np.array(y_pred_rf).astype(int)
+    y_pred_lr = np.array(y_pred_lr).astype(int)
+
+    st.write("### Evaluación de Modelos de Clasificación")
+    st.json({
+        "Precisión Global (Accuracy)": f"{accuracy_score(y_true, y_pred_rf):.2%}",
+        "Precisión (Evitar Falsos Positivos)": f"{precision_score(y_true, y_pred_rf, zero_division=0):.2%}",
+        "Recall (Detectar Lluvia Real)": f"{recall_score(y_true, y_pred_rf, zero_division=0):.2%}",
+    })
+
+    st.write("#### Modelo de Regresión Logística")
+    st.json({
+        "Precisión Global (Accuracy)": f"{accuracy_score(y_true, y_pred_lr):.2%}",
+        "Precisión (Evitar Falsos Positivos)": f"{precision_score(y_true, y_pred_lr, zero_division=0):.2%}",
+        "Recall (Detectar Lluvia Real)": f"{recall_score(y_true, y_pred_lr, zero_division=0):.2%}",
+    })
 
 
-def evaluate_classification(
-    y_true: pd.Series,
-    y_pred: pd.Series,
-    y_prob: pd.Series | None = None,
-    average: str = "weighted",
-) -> dict[str, Any]:
-    """
-    Evaluate a classification model.
+from sklearn.metrics import mean_absolute_error, r2_score
 
-    Parameters
-    ----------
-    y_true : pd.Series
-        True labels.
-    y_pred : pd.Series
-        Predicted labels.
-    y_prob : pd.Series, optional
-        Predicted probabilities (required for ROC-AUC).
-    average : str
-        Averaging method for multi-class classification.
-        Options: 'micro', 'macro', 'weighted'.
-
-    Returns
-    -------
-    dict
-        Dictionary with evaluation metrics.
-    """
-    metrics = {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, average=average, zero_division=0),
-        "recall": recall_score(y_true, y_pred, average=average, zero_division=0),
-        "f1_score": f1_score(y_true, y_pred, average=average, zero_division=0),
-        "confusion_matrix": confusion_matrix(y_true, y_pred),
-        "classification_report": classification_report(
-            y_true, y_pred, output_dict=False
-        ),
-    }
-
-    # ROC-AUC only valid for binary or one-vs-rest
-    if y_prob is not None:
-        try:
-            metrics["roc_auc"] = roc_auc_score(y_true, y_prob, multi_class="ovr")
-        except Exception:
-            metrics["roc_auc"] = None
-
-    return metrics
-
-
-# =========================================================
-#   REGRESSION METRICS
-# =========================================================
-
-
-def evaluate_regression(y_true: pd.Series, y_pred: pd.Series) -> dict[str, float]:
-    """
-    Evaluate a regression model.
-
-    Parameters
-    ----------
-    y_true : pd.Series
-        True regression values.
-    y_pred : pd.Series
-        Predicted regression values.
-
-    Returns
-    -------
-    dict
-        Dictionary with regression metrics.
-    """
+def evaluate_temperature(y_true, y_pred):
+    st.write("### 🌡️ Evaluación Modelo Temperatura Mínima")
     mae = mean_absolute_error(y_true, y_pred)
-    mse = mean_squared_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
-
-    # avoid division by zero in MAPE
-    mape = np.mean(np.abs((y_true - y_pred) / np.maximum(y_true, 1e-9))) * 100
-
-    return {
-        "MAE": mae,
-        "MSE": mse,
-        "RMSE": rmse,
-        "R2": r2_score(y_true, y_pred),
-        "MAPE (%)": mape,
-    }
+    r2 = r2_score(y_true, y_pred)
+    
+    col1, col2 = st.columns(2)
+    col1.metric("Error Medio (MAE)", f"{mae:.2f} °C")
+    col2.metric("Precisión (R2)", f"{r2:.2f}")
+    
+    if mae < 2:
+        st.success("✅ ¡Gran precisión! El modelo falla por menos de 2 grados.")

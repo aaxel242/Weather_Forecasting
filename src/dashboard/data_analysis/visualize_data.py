@@ -2,8 +2,8 @@ import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from utils.p_value import correlation_pvalue_matrix
-from utils.p_value_2 import correlation_heatmap
+# from src.utils.p_value import correlation_pvalue_matrix
+from src.utils.p_value_2 import correlation_heatmap
 
 def visualization_Data (data):
     with st.expander("📊 Visualización de Datos"):

@@ -3,13 +3,16 @@ import os
 import pandas as pd
 from PIL import Image
 
+# Importamos tu lógica de lags y modelos
+from data.add_lags import add_lag_features 
 from utils.cargar_datos import cargar_datos
 from utils.limpieza import limpiar_datos
 from utils.imputar_datos import imputar_datos
-from scripts.eda import eda_interactivo
-from models.prediccion import load_model, predict_with_model
-from models.train_model import train_regression_model 
-from models.evaluation import evaluate_regression
+
+from models.train_model import train_models
+from models.evaluation import evaluate_classification, evaluate_temperature # Importamos ambas
+from models.prediccion import predict_with_model, agente_meteorologico     # Importamos tu agente
+from models.train_model_temp_min import train_temp_min_model
 
 def main():
     # Imagen de inicio
@@ -17,57 +20,74 @@ def main():
     if os.path.exists(image_path):
         st.image(Image.open(image_path))
 
-    st.sidebar.header("📅 Opciones de entrada")
-    fecha = st.sidebar.date_input("Selecciona la fecha")
-    rango = st.sidebar.slider("Rango de días a predecir", 1, 7, 3)
+    rango = st.slider("Rango de días a predecir", 1, 7, 3)
+    
+    if st.button("🔄 Cargar y Procesar Datos"):
 
-    # Cargar y procesar datos
-    data = cargar_datos() 
-    data_imput = None
+        # 1. CARGA Y LIMPIEZA INICIAL
+        data = cargar_datos() 
+        if data is None:
+            st.error("No se pudieron cargar los datos.")
+            return
 
-    if data is not None:
-        # PASO 1: Limpiar comillas y normalizar (SIN borrar filas)
         data_clean = limpiar_datos(data)        
-        # PASO 2: Rellenar huecos con tu lógica de imputación
         data_imput = imputar_datos(data_clean)  
-               
-        eda_interactivo(data_imput)
         
-        # Exportación
-        st.sidebar.markdown("### 📁 Exportar Datos")
-        if st.sidebar.button("💾 Guardar en Servidor"):
-            ruta_dir = os.path.join("src", "datos", "processed")
-            os.makedirs(ruta_dir, exist_ok=True)
-            data_imput.to_csv(os.path.join(ruta_dir, "datos_clima_limpios.csv"), index=True)
-            st.sidebar.success("✅ Guardado en servidor")
+        # 2. GENERAR TARGETS (LAGS)
+        # IMPORTANTE: add_lag_features debe devolver el dataframe procesado
+        # Si tu archivo add_lags.py lee de disco, asegúrate de que guarde y cargue correctamente
+        st.info("Generando variables de predicción futura...")
+        data_final = add_lag_features(data_imput) 
 
-        csv_buffer = data_imput.to_csv(index=True).encode('utf-8')
-        st.sidebar.download_button(
-            label="📥 Descargar CSV limpio e imputado",
-            data=csv_buffer,
-            file_name='data_weather_oficial.csv',
-            mime='text/csv',
-        )
+        # --- LLUVIA  ---
+        st.header("☔ Predicción de Lluvia")
+        target_rain = "bin_prep" 
+        
+        if target_rain in data_final.columns:
+            leaky_rain = [target_rain, "date", "temp_min_target", "precipitacion_target"]
+            features_rain = data_final.drop(columns=[c for c in leaky_rain if c in data_final.columns], errors='ignore')
+            labels_rain = data_final[target_rain].astype(int)
+
+            model_path_rf = "src/models/model_lluvia_rf.pkl"
+            model_path_lr = "src/models/model_lluvia_lr.pkl"
+
+            # Entrenamiento lluvia
+            model_rf, y_pred_rf, model_lr, y_pred_lr = train_models(features_rain, labels_rain, model_path_rf, model_path_lr)
             
-    st.sidebar.markdown("---")
-    target_column = "tmed" 
+            y_true_rain = labels_rain.iloc[int(len(labels_rain) * 0.8):]
+            evaluate_classification(y_true_rain, y_pred_rf, y_pred_lr)
 
-    if data_imput is not None and target_column in data_imput.columns:
-        features = data_imput.drop(columns=[target_column], errors='ignore')
-        labels = data_imput[target_column]
+        # --- TEMPERATURA MÍNIMA ---
+        st.header("🌡️ Predicción de Temperatura Mínima")
+        target_temp = "temp_min_target"
 
-        if st.sidebar.button("🏋🧠 Entrenar modelo"):
-            train_regression_model(features, labels, model_path="src/models/trained_regression_tmed_model.pkl")
-            st.sidebar.success(f"Modelo entrenado para '{target_column}'.")
+        if target_temp in data_final.columns:
+            leaky_temp = [target_temp, "date", "bin_prep", "precipitacion_target"]
+            features_temp = data_final.drop(columns=[c for c in leaky_temp if c in data_final.columns], errors='ignore')
+            labels_temp = data_final[target_temp]
 
-        if st.sidebar.button("🔍📊 Evaluar rendimiento"):
-            model, y_pred_test = train_regression_model(features, labels, model_path="src/models/trained_regression_tmed_model.pkl")
-            y_true_test = labels.iloc[int(len(labels) * 0.8):]
-            st.sidebar.json(evaluate_regression(y_true_test, y_pred_test))
+            # Entrenamiento de tu modelo
+            model_tmin, pred_tmin = train_temp_min_model(features_temp, labels_temp)
+            
+            # Evaluación de tu modelo
+            y_true_tmin = labels_temp.iloc[int(len(labels_temp) * 0.8):]
+            evaluate_temperature(y_true_tmin, pred_tmin)
 
-        if st.button("Generar predicción"):
-            model = load_model("src/models/trained_regression_tmed_model.pkl")
-            st.write("Predicción generada:", predict_with_model(model, features))
+            # --- BLOQUE C: AGENTE AI (CONSEJOS REALES) ---
+            st.markdown("---")
+            st.subheader("🤖 Agente AI: Tu Asistente Personal")
+            
+            # Obtenemos la última predicción disponible (el futuro más cercano)
+            ultima_temp_pred = pred_tmin.iloc[-1]
+            ultima_lluvia_pred = y_pred_rf[-1] # Usamos el RF de tus compañeros
+            
+            consejo = agente_meteorologico(ultima_temp_pred, ultima_lluvia_pred)
+            
+            st.success(f"**Predicción para el próximo periodo:** {ultima_temp_pred:.1f}°C")
+            st.info(f"💡 **Recomendación:** {consejo}")
+
+        # 3. MOSTRAR INTERFAZ DE PREDICCIÓN FINAL
+        predict_with_model(model_path_lr, model_path_rf, features_rain, rango)
 
 if __name__ == "__main__":
     main()

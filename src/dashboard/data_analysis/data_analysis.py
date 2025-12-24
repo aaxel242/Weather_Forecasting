@@ -1,11 +1,8 @@
 import streamlit as st
 
-from utils.visualize_data import visualization_Data
-
 def basic_stats (data):
     # 1. Resumen general
     with st.expander("📊 Resumen del dataset"):
-        st.subheader("📊 Resumen del dataset")
         st.write(data.describe(include="all"))
 
         datos = {
