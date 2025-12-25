@@ -77,12 +77,12 @@ def main():
             st.markdown("---")
             st.subheader("🤖 Agente AI: Tu Asistente Personal")
             
-            # Obtenemos la última predicción disponible (el futuro más cercano)
-            ultima_temp_pred = pred_tmin.iloc[-1]
-            ultima_lluvia_pred = y_pred_rf[-1] # Usamos el RF de tus compañeros
-            
+            # USAMOS .iloc[-1] para forzar a Pandas a coger la ÚLTIMA POSICIÓN
+            ultima_temp_pred = pred_tmin.iloc[-1] 
+            ultima_lluvia_pred = y_pred_rf.iloc[-1] 
+
             consejo = agente_meteorologico(ultima_temp_pred, ultima_lluvia_pred)
-            
+
             st.success(f"**Predicción para el próximo periodo:** {ultima_temp_pred:.1f}°C")
             st.info(f"💡 **Recomendación:** {consejo}")
 

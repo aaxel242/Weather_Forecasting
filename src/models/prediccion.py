@@ -109,15 +109,24 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         st.error("❌ Error: Primero debes entrenar el modelo seleccionado en el menú lateral.")
 
 
-# Temperaruta baja 
-def agente_meteorologico(temp_min):
-    """Lógica del Agente para dar consejos prácticos"""
+#  Temperatura Mínima
+def agente_meteorologico(temp_min, llueve): 
+    """
+    Lógica del Agente para dar consejos prácticos basados en 
+    la temperatura mínima y la probabilidad de lluvia.
+    """
+    # 1. Tu lógica de abrigo (Temperatura Mínima)
     if temp_min < 8:
-        abrigo = " Abrigate bien, hace mucho frio."
+        consejo = "Hace mucho frio, abrigate."
+        st.image(os.path.join("src", "images", "abrigate.png"))
     elif temp_min < 15:
-        abrigo = " Hace fresco, ponte una chaqueta."
+        consejo = "Hace fresco, ponte una chaqueta."
+        st.image(os.path.join("src", "images", "fresco.png"))
     else:
-        abrigo = " Hace buena temperatua."
-        
+        consejo = "Hace buena temperatura."
     
-    return f"{abrigo}"
+    # 2. Complemento de lluvia (Dato de Juan)
+    if llueve == 1:
+        consejo += " Además, lleva paraguas, se espera lluvia. ☔"
+        
+    return consejo
