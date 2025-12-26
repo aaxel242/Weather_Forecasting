@@ -7,6 +7,7 @@ from src.utils.imputar_datos import imputar_datos
 from src.dashboard.data_analysis.data_analysis import basic_stats
 from src.dashboard.data_analysis.visualize_data import visualization_Data
 from src.models.train_model import train_models
+from models.train_model_precipitation import train_models
 from src.models.evaluation import evaluate_classification
 
 def eda_interactivo(data_imput):

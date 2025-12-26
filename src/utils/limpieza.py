@@ -9,7 +9,7 @@ def limpiar_datos(df):
     df = df.drop_duplicates()
 
     # Quitar comillas en todo el archivo
-    df = df.applymap(lambda x: str(x).replace('"', '').strip() if pd.notnull(x) else x)
+    df = df.map(lambda x: str(x).replace('"', '').strip() if pd.notnull(x) else x)
 
     # Normalizar nombres de columnas
     df.columns = (
