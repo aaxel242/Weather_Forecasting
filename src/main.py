@@ -9,7 +9,6 @@ from utils.cargar_datos import cargar_datos
 from utils.limpieza import limpiar_datos
 from utils.imputar_datos import imputar_datos
 
-from models.train_model import train_models
 from models.evaluation import evaluate_classification
 from models.prediccion import predict_with_model
 from models.train_model_precipitation import train_models
