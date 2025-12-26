@@ -29,3 +29,4 @@ def train_temp_min_model(features, target, model_path="src/models/model_temp_min
     
     predictions = pd.Series(model.predict(X_test), index=y_test.index)
     return model, predictions
+
