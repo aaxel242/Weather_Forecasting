@@ -26,7 +26,8 @@ def add_binari_precipitation():
 
 def add_lag_features():
 
-    df = pd.read_csv("src/data/raw/data_binario.csv")
+    df = pd.read_csv("src/data/processed/data_weather_final.csv")
+    df = df.drop(columns=["lluvia_binaria_target"], errors="ignore")
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
@@ -49,7 +50,7 @@ def add_lag_features():
         df[f"precipitacion_lag{lag}"] = df["prec"].shift(lag)
 
     # ============================
-    # 3. ROLLING WINDOWS
+    # 3. ROLLING WINDOWS (pero NO se guardarán)
     # ============================
     df["temp_max_rolling_7"] = df["tmax"].rolling(7).mean()
     df["temp_min_rolling_7"] = df["tmin"].rolling(7).mean()
@@ -61,15 +62,12 @@ def add_lag_features():
     df["temp_max_target"] = df["tmax"].shift(-7)
     df["temp_min_target"] = df["tmin"].shift(-7)
     df["precipitacion_target"] = df["prec"].shift(-7)
-    df["lluvia_binaria_target"] = df["bin_prep"].shift(-7)
 
     # ============================
     # 5. IMPUTACIÓN DE FEATURES
     # ============================
     df = df.interpolate(method="linear")
     df = df.fillna(df.mean(numeric_only=True))
-
-    # Booleanos
     df["es_fin_de_semana"] = df["es_fin_de_semana"].fillna(0).astype(int)
 
     # ============================
@@ -79,11 +77,20 @@ def add_lag_features():
         "temp_max_target",
         "temp_min_target",
         "precipitacion_target",
-        "lluvia_binaria_target"
     ]).reset_index(drop=True)
 
+    # ============================
+    # 7. ELIMINAR COLUMNAS ROLLING
+    # ============================
+    df = df.drop(columns=[
+        "temp_max_rolling_7",
+        "temp_min_rolling_7",
+        "precip_rolling_7"
+    ], errors="ignore")
+
+    # ============================
+    # 8. GUARDAR CSV FINAL
+    # ============================
     df.to_csv("src/data/processed/data_weather_final.csv", index=False)
 
-df = pd.read_csv("src/data/processed/data_weather_final.csv")
-df = df.drop(columns=["precipitacion_target"])
-df.to_csv("src/data/processed/data_weather_final.csv", index=False)
+add_lag_features()

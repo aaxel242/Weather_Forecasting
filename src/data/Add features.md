@@ -3,6 +3,17 @@ Añadimos la columna de bin_prep para:
     - Para que a la hora de hacer el modelo sea mas facil de predecir
     - Tambien para decir que en cualquier caso que la prep sea > 0 siempre llovera aunque sea un poco
     - Y para decir si tienes que llevar paraguas o no, creo que es mas sencillo hacerlo binario que no darle un porcentage al usuario sobre cuanta lluvia va a caer
+    - One-Hot-Encoding
+
+¿Qué son los lags?
+Son columnas que guardan el valor de días anteriores.
+
+Ejemplo:
+temp_max_lag1 → la temperatura máxima de ayer  
+temp_max_lag2 → la temperatura máxima de hace 2 días  
+precipitacion_lag7 → la lluvia de hace 7 días
+
+Sirven para que el modelo pueda ver el pasado.
 
 GENERAR FEATURES:
 
@@ -11,11 +22,9 @@ GENERAR FEATURES:
 
         - Lags: Son los valores de días anteriores. Los usamos porque el clima de hoy influye en el clima de mañana.
 
-        - Rolling windows: Son promedios de varios días. Sirven para ver tendencias y no solo valores sueltos.
-
         - Mes, día del año, semana: El clima cambia según la época del año, así que añadimos estas columnas para que el modelo lo entienda.
 
-        - Interpolación: Cuando creamos lags y rolling aparecen huecos. Los rellenamos suavemente para no perder datos.
+        - Interpolación: Cuando creamos lags y aparecen huecos. Los rellenamos suavemente para no perder datos.
 
         - Targets a 7 días: Para predecir dentro de una semana, movemos la columna hacia arriba 7 posiciones.
 
@@ -25,8 +34,6 @@ GENERAR FEATURES:
         - Esta explicación es para alguien que ya entiende machine learning:
 
         - Lags: Introducen dependencia temporal explícita, permitiendo que el modelo aprenda patrones autoregresivos.
-
-        - Rolling windows: Capturan tendencias de corto plazo y reducen ruido, mejorando la estabilidad del modelo.
 
         - Features temporales: Mes, día del año y semana introducen estacionalidad, esencial en series meteorológicas.
 
