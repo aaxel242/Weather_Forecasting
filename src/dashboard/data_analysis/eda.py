@@ -19,20 +19,21 @@ def main():
     data = cargar_datos()
     
     if data is not None:
-        if data.isna().values.any():
-            data_clean = limpiar_datos(data)
-            data_imput = imputar_datos(data_clean)
+        data_clean = limpiar_datos(data)
+
+        if data_clean.isna().values.any():
+            data_final = imputar_datos(data_clean)
         else:
-            data_imput = limpiar_datos(data)
+            data_final = data_clean
 
         tab1, tab2, tab3 = st.tabs(["Estadísticas", "Correlaciones", "Visualización"])
         with tab1:
-            basic_stats(data_imput)
-            show_evaluation(data_imput)
+            basic_stats(data_final)
+            show_evaluation(data_final)
         with tab2:          
-            correlation_heatmap(data_imput)
+            correlation_heatmap(data_final)
         with tab3:
-            visualization_Data(data_imput)
+            visualization_Data(data_final)
 
 if __name__ == "__main__":
     main()
