@@ -6,7 +6,7 @@ import joblib
 def show_evaluation(data_imput):
     # --- SECCIÓN DE EVALUACIÓN (CARGA DIRECTA) ---
     st.divider()
-    st.header("🚀 Evaluación de Modelos Pre-entrenados")
+    st.header("Evaluación de Modelos Pre-entrenados")
     
     target_col = "bin_prep"
     model_path_rf = "src/models/model_lluvia_RF.pkl"
@@ -40,4 +40,4 @@ def show_evaluation(data_imput):
         except Exception as e:
             st.error(f"Error al cargar o predecir con los modelos: {e}")
     else:
-        st.warning("⚠️ No se encontraron los archivos .pkl en 'src/models/'. Por favor, asegúrate de que los modelos estén entrenados y guardados.")
+        st.warning("No se encontraron los archivos .pkl en 'src/models/'. Por favor, asegúrate de que los modelos estén entrenados y guardados.")

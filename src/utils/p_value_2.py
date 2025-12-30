@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 def correlation_heatmap(data):
-    st.title("🔗 Correlaciones")
+    st.title("Correlaciones")
     data_numeric = data.select_dtypes(include=[np.number])
     
     if len(data_numeric) < 2:
-        st.warning("⚠️ No se puede calcular la correlación: El conjunto de datos numérico tiene menos de 2 filas.")
+        st.warning("No se puede calcular la correlación: El conjunto de datos numérico tiene menos de 2 filas.")
     else:
         corr = data_numeric.corr()
         fig, ax = plt.subplots(figsize=(30,20))
