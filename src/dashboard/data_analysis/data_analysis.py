@@ -1,17 +1,21 @@
 import streamlit as st
 
 def basic_stats (data):
-    # 1. Resumen general
-    st.title("📊 Resumen del dataset")
+    st.subheader("Dataset")
+    st.dataframe(data.head(100), use_container_width=True)
+
+    st.divider()
+
+    st.subheader("Datos básicos")
     st.write(data.describe(include="all"))
 
-    datos = {
-        "n_rows": len(data),
-        "n_columns": len(data.columns),
-        "missing_values": int(data.isna().sum().sum()),
-        "duplicated_rows": int(data.duplicated().sum()),
-        }
+    st.divider()
 
-    st.write("Estado básico del dataset:")
-    for key, value in datos.items():
-        st.info(f"{key}: {value}")
+    st.subheader("Revisión del dataset")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    col1.metric("Filas", len(data))
+    col2.metric("Columnas", len(data.columns))
+    col3.metric("Valores nulos", int(data.isna().sum().sum()))
+    col4.metric("Filas duplicadas", int(data.duplicated().sum()))
