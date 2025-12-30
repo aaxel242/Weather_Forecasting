@@ -51,3 +51,5 @@ if data is not None:
 
     if mostrar_eda:
         eda_interactivo(data_imput)
+
+# empezar frontend
