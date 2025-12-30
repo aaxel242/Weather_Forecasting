@@ -47,3 +47,31 @@ def imputar_datos(df):
     df_imput = df_imput.round(1)
 
     return df_imput
+
+# import pandas as pd
+# import numpy as np
+
+
+# def imputar_datos(df):
+#     df_imput = df.copy()
+    
+#     # Asegurarnos que la columna de fecha existe para agrupar
+#     if 'date' in df_imput.columns:
+#         df_imput['date'] = pd.to_datetime(df_imput['date'])
+#         meses = df_imput['date'].dt.month
+#     else:
+#         # Si la fecha es el índice
+#         meses = df_imput.index.month
+
+#     # Columnas numéricas (todas las que mencionaste)
+#     cols_num = df_imput.select_dtypes(include=[np.number]).columns
+
+#     for col in cols_num:
+#         # Imputar por media del mes (estacionalidad)
+#         df_imput[col] = df_imput[col].fillna(
+#             df_imput.groupby(meses)[col].transform("mean")
+#         )
+    
+#     # Relleno final para casos extremos y redondeo
+#     df_imput = df_imput.fillna(df_imput.mean(numeric_only=True)).round(2)
+#     return df_imput

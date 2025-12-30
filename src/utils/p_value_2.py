@@ -8,22 +8,20 @@ import matplotlib.pyplot as plt
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 def correlation_heatmap(data):
-        # 2. Correlaciones
-    with st.expander("🔗 Correlaciones"):
-        st.subheader("🔗 Correlaciones")
-        data_numeric = data.select_dtypes(include=["float", "int"])
+    st.title("🔗 Correlaciones")
+    data_numeric = data.select_dtypes(include=[np.number])
+    
+    if len(data_numeric) < 2:
+        st.warning("⚠️ No se puede calcular la correlación: El conjunto de datos numérico tiene menos de 2 filas.")
+    else:
+        corr = data_numeric.corr()
+        fig, ax = plt.subplots(figsize=(30,20))
+        sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
         
-        if len(data_numeric) < 2:
-            st.warning("⚠️ No se puede calcular la correlación: El conjunto de datos numérico tiene menos de 2 filas.")
-        else:
-            corr = data_numeric.corr()
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
-            st.pyplot(fig)
-            
-            p_values = correlation_pvalue_matrix(data_numeric) 
-            st.write("Variables con correlación significativa (p <= 0.05):")
-            st.write(p_values)
+        p_values = correlation_pvalue_matrix(data_numeric) 
+        st.write("Variables con correlación significativa (p <= 0.05):")
+        st.write(p_values)
 
 def correlation_pvalue_matrix(df: pd.DataFrame, method: str = "pearson") -> pd.DataFrame:
     """
