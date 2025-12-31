@@ -11,7 +11,7 @@ from src.dashboard.data_analysis.data_analysis import basic_stats
 from src.dashboard.data_analysis.visualize_data import visualization_Data
 from src.dashboard.data_analysis.show_evaluation import show_evaluation
 
-st.set_page_config(page_title="Weather Forecasting AI", layout="wide")
+st.set_page_config(page_title="Weather Forecasting", layout="wide")
 
 def main():
     st.title("Weather Forecasting - Data Analysis")
