@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 
@@ -54,6 +55,11 @@ precision_rf = precision_score(y_test, predictions_rf, average='weighted', zero_
 recall_rf = recall_score(y_test, predictions_rf, average='weighted', zero_division=0)
 f1_rf = f1_score(y_test, predictions_rf, average='weighted', zero_division=0)
 
+mae_rf = mean_absolute_error(y_test, predictions_rf)
+mse_rf = mean_squared_error(y_test, predictions_rf)
+rmse_rf = np.sqrt(mean_squared_error(y_test, predictions_rf))
+r2_rf = r2_score(y_test, predictions_rf)
+
 print(f"\n--- Evaluación Modelo Random Forest ---")
 print(f"Accuracy: {accuracy_rf:.4f}")
 print(f"Precision: {precision_rf:.4f}")
@@ -80,6 +86,11 @@ precision_lr = precision_score(y_test, predictions_lr, average='weighted', zero_
 recall_lr = recall_score(y_test, predictions_lr, average='weighted', zero_division=0)
 f1_lr = f1_score(y_test, predictions_lr, average='weighted', zero_division=0)
 
+mae_lr = mean_absolute_error(y_test, predictions_lr)
+mse_lr = mean_squared_error(y_test, predictions_lr)
+rmse_lr = np.sqrt(mean_squared_error(y_test, predictions_lr))
+r2_lr = r2_score(y_test, predictions_lr)
+
 print(f"\n--- Evaluación Modelo Logistic Regression ---")
 print(f"Accuracy: {accuracy_lr:.4f}")
 print(f"Precision: {precision_lr:.4f}")
@@ -93,4 +104,13 @@ print(f"\n{classification_report(y_test, predictions_lr)}")
 print("\n\n--- COMPARATIVA DE MODELOS ---")
 print(f"Random Forest F1-Score: {f1_rf:.4f}")
 print(f"Logistic Regression F1-Score: {f1_lr:.4f}")
+
+print("\n\n--- COMPARATIVA DE MODELOS ---")
+print(f"Random Forest MAE: {mae_rf:.4f}")
+print(f"Logistic Regression MAE: {mae_lr:.4f}")
+
+print("\n\n--- COMPARATIVA DE MODELOS ---")
+print(f"Random Forest RMSE: {rmse_rf:.4f}")
+print(f"Logistic Regression RMSE: {rmse_lr:.4f}")
+
 print(f"\nModelos guardados en: {model_dir}")
