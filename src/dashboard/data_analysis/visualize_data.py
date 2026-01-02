@@ -22,13 +22,8 @@ def visualization_Data(data):
         },
         {
             "archivo": "paraguas.png", 
-            "titulo": "Análisis de Vientos",
-            "info": "Distribución de la precipitación y racha máxima del viento."
-        },
-        {
-            "archivo": "paraguas2.png", 
-            "titulo": "Matriz PowerBI",
-            "info": "Relación entre humedad y precipitación."
+            "titulo": "Análisis de precipitación",
+            "info": "Relación humedad y precipitación."
         }
     ]
 
