@@ -42,6 +42,7 @@ y_train, y_test = labels.iloc[:split], labels.iloc[split:]
 # ============================================
 print("Entrenando Random Forest...")
 model_rf = Pipeline([
+    ('scaler', StandardScaler()),
     ('classifier', RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=42))
 ])
 
