@@ -1,55 +1,59 @@
 import streamlit as st
-from src.utils.cargar_datos import cargar_datos
-from src.utils.limpieza import limpiar_datos
-from src.utils.imputar_datos import imputar_datos
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
 
-# Importaciones corregidas
-from src.dashboard.data_analysis.data_analysis import basic_stats
-from src.dashboard.data_analysis.visualize_data import visualization_Data
-from models.train_model_precipitation import train_models
-from src.models.evaluation import evaluate_classification
-
-def eda_interactivo(data_imput):
-    st.header("🔍 Exploratory Data Analysis (EDA)")
+def render_eda_section():
+    st.header("🔍 Análisis Exploratorio de Datos Históricos")
     
-    with st.expander("Vista previa de la tabla de datos limpia e imputada"):
-        st.dataframe(data_imput)
-        basic_stats(data_imput)
-        visualization_Data(data_imput)
+    # --- CORRECCIÓN DE RUTA PARA PROFUNDIDAD EXTRA ---
+    # Estamos en: src/dashboard/data_analysis/eda.py
+    # 1. dirname -> src/dashboard/data_analysis
+    # 2. dirname -> src/dashboard
+    # 3. dirname -> src
+    base_src = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    # Construimos la ruta hacia los datos
+    csv_path = os.path.join(base_src, 'data', 'processed', 'data_weather_oficial.csv')
 
-    with st.expander("Evaluación de Modelos", expanded=True):
-        # QUITAMOS el st.button anidado porque causa el error de reinicio
-        # En su lugar, podemos usar un botón que ejecute la lógica directamente
-        if st.button("🚀 Entrenar y Evaluar Modelos"):
-            target_column_prep = "bin_prep"
+    # Cargar datos
+    try:
+        df = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        st.error(f"❌ Error: No se encuentra el archivo en:\n{csv_path}")
+        return
 
-            if data_imput is not None and target_column_prep in data_imput.columns:
-                leaky = [target_column_prep, "date"]
-                features = data_imput.drop(columns=[c for c in leaky if c in data_imput.columns], errors='ignore')
-                labels = data_imput[target_column_prep].astype(float).astype(int)
+    # 1. Muestra de Datos
+    st.subheader("Vista de Datos")
+    st.dataframe(df.head())
+    
+    col1, col2 = st.columns(2)
+    
+    # 2. Estadísticas Básicas
+    with col1:
+        st.markdown("### Estadísticas Descriptivas")
+        cols_existentes = [c for c in ['tmax', 'tmin', 'prec', 'velmedia'] if c in df.columns]
+        st.write(df[cols_existentes].describe())
 
-                model_path = "src/models/"
-                model_path_rf = f"{model_path}/model_lluvia_rf.pkl"
-                model_path_lr = f"{model_path}/model_lluvia_lr.pkl"
+    # 3. Distribución
+    with col2:
+        st.markdown("### Distribución de Temperaturas Máximas")
+        if 'tmax' in df.columns:
+            fig, ax = plt.subplots()
+            sns.histplot(df['tmax'], kde=True, color="orange", ax=ax)
+            ax.set_title("Histograma T_MAX")
+            st.pyplot(fig)
 
-                with st.spinner("Entrenando modelos..."):
-                    model_rf, y_pred_rf, model_lr, y_pred_lr = train_models(features, labels, model_path_rf, model_path_lr)
-
-                y_true = labels.iloc[int(len(labels) * 0.8):]
-                
-                # IMPORTANTE: Debes capturar el resultado y MOSTRARLO
-                evaluate_classification(y_true, y_pred_rf, y_pred_lr)
-
-# --- FLUJO PRINCIPAL ---
-data = cargar_datos()
-if data is not None:
-    data_clean = limpiar_datos(data)
-    data_imput = imputar_datos(data_clean)
-
-    # RECOMENDACIÓN: Usa un checkbox en la barra lateral para mantener el estado
-    mostrar_eda = st.sidebar.checkbox("Activar Análisis Exploratorio (EDA)")
-
-    if mostrar_eda:
-        eda_interactivo(data_imput)
-
-# empezar frontend
+    # 4. Correlaciones
+    st.markdown("### Mapa de Correlaciones (Heatmap)")
+    fig_corr, ax_corr = plt.subplots(figsize=(10, 6))
+    
+    posibles_cols = ['tmax', 'tmin', 'prec', 'dewpoint_2m_c_mean', 'cloudcover__mean', 'surface_pressure_hpa_mean']
+    cols_corr = [c for c in posibles_cols if c in df.columns]
+    
+    if len(cols_corr) > 1:
+        sns.heatmap(df[cols_corr].corr(), annot=True, cmap='coolwarm', ax=ax_corr)
+        st.pyplot(fig_corr)
+    else:
+        st.info("No hay suficientes columnas numéricas para el heatmap.")

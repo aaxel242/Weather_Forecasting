@@ -5,49 +5,97 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score
 
-def train_classifier_model_LR(features, labels, split_factor=0.8, model_path="src/models/trained_classifier_lr.pkl"):
-    # Convertimos labels a entero para evitar problemas de tipos
-    labels = labels.astype(int)
+def preparar_datos_lluvia(df):
+    """Auxiliar para preparar features de lluvia"""
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.sort_values('date')
+
+    # --- GENERACIÓN DE VARIABLES (CORRECCIÓN IMPORTANTE) ---
+    # Si no creamos esto, el modelo no encuentra 'mes' ni 'dia_anio' y falla luego
+    df['mes'] = df['date'].dt.month
+    df['dia_anio'] = df['date'].dt.dayofyear
+    # -------------------------------------------------------
+
+    # Crear target binario si no existe
+    if 'bin_prep' not in df.columns and 'prec' in df.columns:
+        df['bin_prep'] = (df['prec'] > 0).astype(int)
     
-    split = int(len(features) * split_factor)
-    X_train, X_test = features.iloc[:split], features.iloc[split:]
-    y_train, y_test = labels.iloc[:split], labels.iloc[split:]
+    # Features clave para lluvia
+    features_list = [
+        'cloudcover__mean', 'cloudcover__max', 
+        'surface_pressure_hpa_min', 'surface_pressure_hpa_mean', 
+        'hrmedia', 'hrmax',
+        'mes', 'dia_anio', 
+        'estacion_invierno', 'estacion_primavera'
+    ]
+    
+    # Ahora sí las encontrará porque las acabamos de crear
+    features_cols = [c for c in features_list if c in df.columns]
+    
+    return df[features_cols], df['bin_prep']
 
+def train_classifier_model_LR(X_train, X_test, y_train, y_test, model_path):
+    print(f"\nTraining Logistic Regression...")
     model = Pipeline([
         ('scaler', StandardScaler()),
         ('classifier', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))
     ])
-
     model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(f"📊 LR Accuracy: {acc:.4f}")
+    
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     joblib.dump(model, model_path)
-    
-    predictions = pd.Series(model.predict(X_test), index=y_test.index)
-    return model, predictions
+    return model, y_pred
 
-def train_classifier_model_RF(features, labels, split_factor=0.8, model_path="src/models/trained_classifier_rf.pkl"):
-    # Convertimos labels a entero para evitar problemas de tipos
-    labels = labels.astype(int)
-    
-    split = int(len(features) * split_factor)
-    X_train, X_test = features.iloc[:split], features.iloc[split:]
-    y_train, y_test = labels.iloc[:split], labels.iloc[split:]
-
+def train_classifier_model_RF(X_train, X_test, y_train, y_test, model_path):
+    print(f"\nTraining Random Forest Classifier...")
     model = Pipeline([
-        ('classifier', RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=42))
+        ('classifier', RandomForestClassifier(n_estimators=200, class_weight='balanced', random_state=42, n_jobs=-1))
     ])
-
     model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    print(f"📊 RF Accuracy: {acc:.4f}")
+    
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     joblib.dump(model, model_path)
+    return model, y_pred
+
+def train_models(df, model_path_rf="src/models/modelo_lluvia.pkl", model_path_lr="src/models/modelo_lluvia_lr.pkl"):
+    print("\n--- ENTRENANDO MODELOS DE PRECIPITACIÓN ---")
     
-    predictions = pd.Series(model.predict(X_test), index=y_test.index)
-    return model, predictions
+    # Preparar datos (Ahora incluye mes y dia_anio)
+    X, y = preparar_datos_lluvia(df)
+    y = y.astype(int)
+    
+    split = int(len(X) * 0.8)
+    X_train, X_test = X.iloc[:split], X.iloc[split:]
+    y_train, y_test = y.iloc[:split], y.iloc[split:]
 
-def train_models (features, labels, model_path_rf, model_path_lr):
+    print(f"Datos entrenamiento: {len(X_train)} | Test: {len(X_test)}")
+    print(f"Features usadas: {list(X.columns)}")  # Para verificar
 
-    model_rf, y_pred_rf = train_classifier_model_RF(features, labels, model_path=model_path_rf)
-    model_lr, y_pred_lr = train_classifier_model_LR(features, labels, model_path=model_path_lr)
+    base_dir = os.getcwd()
+    abs_path_rf = os.path.join(base_dir, model_path_rf)
+    abs_path_lr = os.path.join(base_dir, model_path_lr)
 
+    model_rf, y_pred_rf = train_classifier_model_RF(X_train, X_test, y_train, y_test, abs_path_rf)
+    model_lr, y_pred_lr = train_classifier_model_LR(X_train, X_test, y_train, y_test, abs_path_lr)
+
+    print(f"\n✅ Modelos de lluvia actualizados correctamente.")
     return model_rf, y_pred_rf, model_lr, y_pred_lr
+
+if __name__ == "__main__":
+    try:
+        # Ajustamos ruta para ejecución directa
+        df_load = pd.read_csv('src/data/processed/data_weather_oficial.csv')
+        train_models(df_load)
+    except FileNotFoundError:
+        print("⚠️ No se encontró el dataset.")
