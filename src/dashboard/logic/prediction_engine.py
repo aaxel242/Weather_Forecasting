@@ -10,7 +10,7 @@ def cargar_modelos(base_path):
         models_dir = os.path.join(base_path, 'models')
         m_tmax = joblib.load(os.path.join(models_dir, 'modelo_tmax.pkl'))
         m_tmin = joblib.load(os.path.join(models_dir, 'modelo_tmin.pkl'))
-        m_lluvia = joblib.load(os.path.join(models_dir, 'modelo_lluvia.pkl'))
+        m_lluvia = joblib.load(os.path.join(models_dir, 'modelo_lluvia_rf.pkl'))
         return m_tmax, m_tmin, m_lluvia
     except Exception as e:
         st.error(f"Error cargando modelos: {e}")
@@ -19,7 +19,7 @@ def cargar_modelos(base_path):
 def preparar_datos_prediccion(base_path):
     """Lee el CSV y prepara las últimas 7 filas para predecir"""
     try:
-        csv_path = os.path.join(base_path, 'data', 'processed', 'data_weather_oficial.csv')
+        csv_path = os.path.join(base_path, 'data', 'processed', 'data_weather_final.csv')
         df = pd.read_csv(csv_path)
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
@@ -44,11 +44,7 @@ def ejecutar_predicciones(df, m_tmax, m_tmin, m_lluvia):
     # Obtener columnas requeridas por el modelo (seguridad)
     f_tmax = getattr(m_tmax, "feature_names_in_", df.columns)
     f_tmin = getattr(m_tmin, "feature_names_in_", df.columns)
-    
-    # Fallback manual para features de lluvia si no están definidos en el pickle
-    f_rain_default = ['cloudcover__mean', 'cloudcover__max', 'surface_pressure_hpa_min', 
-                    'surface_pressure_hpa_mean', 'hrmedia', 'hrmax', 'mes', 'dia_anio']
-    f_rain = getattr(m_lluvia, "feature_names_in_", f_rain_default)
+    f_rain = getattr(m_lluvia, "feature_names_in_", df.columns)
     
     # Filtrar solo columnas existentes para evitar crash
     f_rain = [c for c in f_rain if c in df.columns]
