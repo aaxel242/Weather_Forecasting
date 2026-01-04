@@ -48,7 +48,7 @@ def visualization_Data(data):
 
     st.divider()
 
-    interactive_distribution (data)
+    interactive_distribution(data)
 
 def interactive_distribution(data):
     st.header("Análisis Exploratorio Dinámico")
@@ -62,7 +62,7 @@ def interactive_distribution(data):
 
     # 1. HISTOGRAMA
     with row1_col1:
-        st.subheader("1. Distribución (Histograma)")
+        st.subheader("1. Distribución")
         feat_hist = st.selectbox("Selecciona variable:", cols_numericas, key="hist")
         # El spinner muestra una barra de carga local
         with st.spinner('Actualizando Histograma...'):
@@ -71,19 +71,39 @@ def interactive_distribution(data):
             ax1.set_title(f"Distribución de {feat_hist}")
             st.pyplot(fig1)
 
-    # 2. BOXPLOT
+    # 2. COMPARACIÓN ENTRE COLUMNAS
     with row1_col2:
-        st.subheader("2. Análisis de Atípicos (Boxplot)")
-        feat_box = st.selectbox("Selecciona variable:", cols_numericas, key="box")
-        with st.spinner('Calculando Boxplot...'):
-            fig2, ax2 = plt.subplots()
-            sns.boxplot(y=data[feat_box], color="lightgreen", ax=ax2)
-            ax2.set_title(f"Boxplot de {feat_box}")
-            st.pyplot(fig2)
+        st.subheader("2. Comparación entre columnas (Step Plot)")
+
+        feat_a = st.selectbox("Variable A:", cols_numericas, key="step_a")
+        feat_b = st.selectbox("Variable B:", cols_numericas, key="step_b")
+
+        with st.spinner('Generando gráfico escalonado...'):
+
+            # Preparamos dataframe para graficar
+            if "date" in data.columns:
+                df_plot = data.set_index("date")[[feat_a, feat_b]]
+            elif "fecha" in data.columns:
+                df_plot = data.set_index("fecha")[[feat_a, feat_b]]
+            else:
+                df_plot = data[[feat_a, feat_b]]
+
+            fig, ax = plt.subplots(figsize=(8, 4))
+
+            ax.step(df_plot.index, df_plot[feat_a], label=feat_a, linewidth=1.2, where="mid")
+            ax.step(df_plot.index, df_plot[feat_b], label=feat_b, linewidth=1.2, where="mid")
+
+            ax.set_title(f"Comparación temporal (Step Plot): {feat_a} vs {feat_b}")
+            ax.set_xlabel("Tiempo")
+            ax.set_ylabel("Valores")
+            ax.legend()
+
+            plt.xticks(rotation=45)
+            st.pyplot(fig)
 
     # 3. SCATTER PLOT
     with row2_col1:
-        st.subheader("3. Relación X vs Y (Scatter)")
+        st.subheader("3. Relación X vs Y")
         feat_x = st.selectbox("Eje X:", cols_numericas, index=0, key="scat_x")
         feat_y = st.selectbox("Eje Y:", cols_numericas, index=1, key="scat_y")
         with st.spinner('Dibujando Dispersión...'):
@@ -95,7 +115,7 @@ def interactive_distribution(data):
     # 4. EVOLUCIÓN TEMPORAL (Solución al error de 'date')
     with row2_col2:
         st.subheader("4. Evolución Temporal")
-        feat_time = st.selectbox("Variable temporal:", ["tmed", "prec", "hrmedia", "tmax", "tmin"], key="time")
+        feat_time = st.selectbox("Variable temporal:", cols_numericas, key="time")
         
         with st.spinner('Cargando Serie Temporal...'):
             # SOLUCIÓN: Si 'date' es el índice, lo recuperamos con .index
