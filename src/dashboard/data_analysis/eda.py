@@ -9,7 +9,6 @@ from src.utils.imputar_datos import imputar_datos
 from src.utils.p_value_2 import correlation_heatmap
 from src.dashboard.data_analysis.data_analysis import basic_stats
 from src.dashboard.data_analysis.visualize_data import visualization_Data
-from src.dashboard.data_analysis.show_evaluation import show_evaluation
 
 st.set_page_config(page_title="Weather Forecasting", layout="wide")
 
@@ -29,7 +28,6 @@ def render_eda_section():
         tab1, tab2, tab3 = st.tabs(["Estadísticas", "Correlaciones", "Visualización"])
         with tab1:
             basic_stats(data_final)
-            # show_evaluation()
         with tab2:          
             correlation_heatmap(data_final)
         with tab3:
