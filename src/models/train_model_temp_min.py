@@ -5,66 +5,95 @@ import os
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-def train_temp_min_model(data_path='src/data/processed/data_weather_final.csv', model_path="src/models/model_temp_min_rf.pkl"):
-    # 1. Cargamos datos
-    df = pd.read_csv(data_path)
-    df['date'] = pd.to_datetime(df['date'])
-    df = df.sort_values('date') # Crucial para series temporales
-
-    # 2. Ingeniería de Características
+def train_temp_min_model(df, model_path="src/models/modelo_tmin.pkl"):
+    """
+    Entrena un modelo de regresión para la temperatura mínima.
+    Recibe el DataFrame completo, genera lags y selecciona features óptimas.
+    """
+    print("\n--- ENTRENANDO MODELO T_MIN (Random Forest) ---")
+    
+    # 1. PREPARACIÓN DE DATOS (Feature Engineering interna)
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.sort_values('date')
+    
+    # Generamos Lags si no existen
+    if 'tmin_yesterday' not in df.columns:
+        df['tmin_yesterday'] = df['tmin'].shift(1)
+        
+    # Variables temporales
     df['mes'] = df['date'].dt.month
     df['dia_anio'] = df['date'].dt.dayofyear
     
-    # 3. Selección de Features
+    # Limpiamos nulos generados por el lag
+    df = df.dropna()
+
+    # Selección de Features Óptimas (Basado en análisis previo)
     features_list = [
-        'dewpoint_2m_c_mean', 'dewpoint_2m_c_max', 'dewpoint_2m_c_min',
-        'dia_anio', 'mes',
-        'estacion_invierno', 'estacion_verano', 'estacion_primavera', 'estacion_otoo',
-        'cloudcover__mean', 'cloudcover__min', 'cloudcover__max',
-        'surface_pressure_hpa_max', 'surface_pressure_hpa_mean',
-        'velmedia', 'hrmax'
+        'tmin_yesterday',       # La inercia térmica (CRUCIAL)
+        'dewpoint_2m_c_min',    # Relación física directa
+        'dewpoint_2m_c_mean',
+        'dia_anio', 'mes',      # Estacionalidad
+        'estacion_invierno', 'estacion_verano',
+        'cloudcover__min',      # Nubes nocturnas (evitan heladas)
+        'cloudcover__mean'
     ]
     
-    target = 'tmin' 
+    # Filtramos para asegurar que solo usamos columnas que existen
+    features_cols = [c for c in features_list if c in df.columns]
     
-    X = df[features_list]
-    y = df[target]
+    X = df[features_cols]
+    y = df['tmin']
 
-    # 4. División Cronológica 
+    # 2. SPLIT (Respetando orden temporal)
     split = int(len(X) * 0.8)
     X_train, X_test = X.iloc[:split], X.iloc[split:]
     y_train, y_test = y.iloc[:split], y.iloc[split:]
 
-    # 5. Pipeline con Escalado 
-    model_pipeline = Pipeline([
-        ('scaler', StandardScaler()),
+    print(f"Features usadas: {features_cols}")
+    print(f"Datos de entrenamiento: {len(X_train)} | Test: {len(X_test)}")
+
+    # 3. PIPELINE Y ENTRENAMIENTO
+    model = Pipeline([
+        ('scaler', StandardScaler()), # Normalizamos (buena práctica aunque sea RF)
         ('regressor', RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1))
     ])
 
     # Entrenamos
     model_pipeline.fit(X_train, y_train)
     
-    # 6. Guardamos el modelo
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    joblib.dump(model_pipeline, model_path)
+    # 4. EVALUACIÓN
+    y_pred = model.predict(X_test)
     
-    # 7. Evaluación Completa (Basado en el modelo de Máxima)
-    predictions = model_pipeline.predict(X_test)
-    mae = mean_absolute_error(y_test, predictions)
-    mse = mean_squared_error(y_test, predictions)
-    rmse = np.sqrt(mean_squared_error(y_test, predictions))
-    r2 = r2_score(y_test, predictions)
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)
 
-    print(f"--- Evaluacion Modelo Temp Minima ---")
-    print(f"MAE (Error Medio Absoluto): {mae:.4f} °C")
-    print(f"RMSE (Error Cuadrático Medio): {rmse:.4f} °C")
-    print(f"R² (Coeficiente de Determinación): {r2:.4f}")
+    print(f"📊 RESULTADOS T_MIN:")
+    print(f"   - MAE (Error Medio): {mae:.4f} °C")
+    print(f"   - RMSE: {rmse:.4f} °C")
+    print(f"   - R² Score: {r2:.4f}")
 
-    print(f"MSE (Error Cuadrático Medio): {mse:.4f} °C²") # para que la computadora aprenda ( castiga los fallos graves)
+    # 5. GUARDADO
+    # Usamos ruta absoluta para evitar errores
+    base_dir = os.getcwd()
+    abs_model_path = os.path.join(base_dir, model_path)
     
-    return model_pipeline, predictions
+    os.makedirs(os.path.dirname(abs_model_path), exist_ok=True)
+    joblib.dump(model, abs_model_path)
+    print(f"✅ Modelo guardado en: {abs_model_path}")
+    
+    predictions = pd.Series(y_pred, index=y_test.index)
+    return model, predictions
 
+# Bloque para ejecutar este script directamente si se desea
 if __name__ == "__main__":
-    train_temp_min_model()
+    # Carga de prueba
+    try:
+        df_load = pd.read_csv('src/data/processed/data_weather_oficial.csv')
+        train_temp_min_model(df_load)
+    except FileNotFoundError:
+        print("⚠️ No se encontró el dataset para prueba rápida.")
