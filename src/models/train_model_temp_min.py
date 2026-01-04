@@ -62,7 +62,7 @@ def train_temp_min_model(df, model_path="src/models/modelo_tmin.pkl"):
     ])
 
     # Entrenamos
-    model_pipeline.fit(X_train, y_train)
+    model.fit(X_train, y_train)
     
     # 4. EVALUACIÓN
     y_pred = model.predict(X_test)

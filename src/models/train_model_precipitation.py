@@ -1,12 +1,10 @@
 import joblib
 import pandas as pd
 import os
-import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import mean_absolute_error, r2_score
 
@@ -56,29 +54,6 @@ def train_classifier_model_LR(X_train, X_test, y_train, y_test, model_path):
     
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     joblib.dump(model, model_path)
-    
-    predictions = pd.Series(model.predict(X_test), index=y_test.index)
-
-    # 7. Evaluación Completa (Basado en el modelo de Máxima)
-    predictions = model.predict(X_test)
-    mae = mean_absolute_error(y_test, predictions)
-    rmse = np.sqrt(mean_squared_error(y_test, predictions))
-    r2 = r2_score(y_test, predictions)
-
-    print(f"--- Evaluacion Modelo Temp Minima ---")
-    print(f"MAE (Error Medio Absoluto): {mae:.4f} °C")
-    print(f"RMSE (Error Cuadrático Medio): {rmse:.4f} °C")
-    print(f"R² (Coeficiente de Determinación): {r2:.4f}")
-
-    return model, predictions
-
-def train_classifier_model_RF(features, labels, split_factor=0.8, model_path="src/models/trained_classifier_rf.pkl"):
-    # Convertimos labels a entero para evitar problemas de tipos
-    labels = labels.astype(int)
-    
-    split = int(len(features) * split_factor)
-    X_train, X_test = features.iloc[:split], features.iloc[split:]
-    y_train, y_test = labels.iloc[:split], labels.iloc[split:]
     return model, y_pred
 
 def train_classifier_model_RF(X_train, X_test, y_train, y_test, model_path):
@@ -113,20 +88,6 @@ def evaluate_classification(y_true, y_pred, model_name):
 def train_models(df):
     print("\n--- ENTRENANDO MODELOS DE PRECIPITACIÓN ---")
     
-    predictions = pd.Series(model.predict(X_test), index=y_test.index)
-
-    # 7. Evaluación Completa (Basado en el modelo de Máxima)
-    predictions = model.predict(X_test)
-    mae = mean_absolute_error(y_test, predictions)
-    rmse = np.sqrt(mean_squared_error(y_test, predictions))
-    r2 = r2_score(y_test, predictions)
-
-    print(f"--- Evaluacion Modelo Temp Minima ---")
-    print(f"MAE (Error Medio Absoluto): {mae:.4f} °C")
-    print(f"RMSE (Error Cuadrático Medio): {rmse:.4f} °C")
-    print(f"R² (Coeficiente de Determinación): {r2:.4f}")
-
-    return model, predictions
     # Preparar datos (Ahora incluye mes y dia_anio)
     X, y = preparar_datos_lluvia(df)
     y = y.astype(int)
