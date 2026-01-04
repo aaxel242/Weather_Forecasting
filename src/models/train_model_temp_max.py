@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error as
 import joblib
 
 # Load the processed weather dataset
-dataset_weather = pd.read_csv('src/data/processed/data_weather_oficial.csv')
+dataset_weather = pd.read_csv('src/data/processed/data_weather_final.csv')
 
 # convert 'date' column to datetime
 dataset_weather['date'] = pd.to_datetime(dataset_weather['date'])

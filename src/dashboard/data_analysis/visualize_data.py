@@ -1,29 +1,109 @@
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import streamlit as st
+import os
 
-# from src.utils.p_value import correlation_pvalue_matrix
-from src.utils.p_value_2 import correlation_heatmap
+def visualization_Data(data):
+    st.title("Gráficos con PowerBI")
 
-def visualization_Data (data):
-    with st.expander("📊 Visualización de Datos"):
-        # correlation_pvalue_matrix(data)
-        correlation_heatmap(data)
+    # Definimos la ruta de la carpeta
+    image_path = "src/images/"
 
-        # 3. Distribución de variables numéricas
-        with st.expander("📈 Distribuciones"):
-            st.subheader("📈 Distribuciones")
-            columna = st.selectbox("Selecciona una columna numérica:", data.select_dtypes(include=["float", "int"]).columns)
-            fig, ax = plt.subplots()
-            sns.histplot(data[columna], bins=30, kde=True, ax=ax)
-            st.pyplot(fig)
+    # Lista de imágenes con sus títulos y descripciones personalizadas
+    # Asegúrate de que los nombres de archivo coincidan exactamente con los que tienes en la carpeta
+    imagenes_info = [
+        {
+            "archivo": "manga_corta.png", 
+            "titulo": "Dashboard General",
+            "info": "Resumen global de temperaturas y precipitaciones anuales."
+        },
+        {
+            "archivo": "paraguas.png", 
+            "titulo": "Análisis de precipitación",
+            "info": "Relación humedad y precipitación."
+        }
+    ]
 
-        # 4. Series temporales
-        with st.expander("⏳ Evolución temporal"):
-            st.subheader("⏳ Evolución temporal")
-            col_time = st.selectbox("Selecciona variable para graficar en el tiempo:", ["tmed", "prec", "hrmedia"])
-            if "fecha" in data.columns:
-                fig, ax = plt.subplots()
-                data.groupby("fecha")[col_time].mean().plot(ax=ax)
-                ax.set_title(f"Evolución de {col_time} en el tiempo")
-                st.pyplot(fig)
+    # Creamos columnas (en este caso 3 columnas para que estén una al lado de la otra)
+    cols = st.columns(len(imagenes_info))
+
+    for i, img_data in enumerate(imagenes_info):
+        with cols[i]:
+            # Título encima de la imagen
+            st.markdown(f"### {img_data['titulo']}")
+            
+            # Ruta completa del archivo
+            full_path = os.path.join(image_path, img_data['archivo'])
+            
+            # Verificamos si la imagen existe antes de mostrarla
+            if os.path.exists(full_path):
+                st.image(full_path, use_container_width=True)
+                # Información debajo de la imagen
+                st.caption(img_data['info'])
+            else:
+                st.error(f"No se encontró: {img_data['archivo']}")
+
+    st.divider()
+
+    interactive_distribution (data)
+
+def interactive_distribution(data):
+    st.header("Análisis Exploratorio Dinámico")
+    
+    # Preparamos las columnas numéricas
+    cols_numericas = data.select_dtypes(include=[np.number]).columns.tolist()
+
+    # Layout de 2x2
+    row1_col1, row1_col2 = st.columns(2)
+    row2_col1, row2_col2 = st.columns(2)
+
+    # 1. HISTOGRAMA
+    with row1_col1:
+        st.subheader("1. Distribución (Histograma)")
+        feat_hist = st.selectbox("Selecciona variable:", cols_numericas, key="hist")
+        # El spinner muestra una barra de carga local
+        with st.spinner('Actualizando Histograma...'):
+            fig1, ax1 = plt.subplots()
+            sns.histplot(data[feat_hist], kde=True, color="skyblue", ax=ax1)
+            ax1.set_title(f"Distribución de {feat_hist}")
+            st.pyplot(fig1)
+
+    # 2. BOXPLOT
+    with row1_col2:
+        st.subheader("2. Análisis de Atípicos (Boxplot)")
+        feat_box = st.selectbox("Selecciona variable:", cols_numericas, key="box")
+        with st.spinner('Calculando Boxplot...'):
+            fig2, ax2 = plt.subplots()
+            sns.boxplot(y=data[feat_box], color="lightgreen", ax=ax2)
+            ax2.set_title(f"Boxplot de {feat_box}")
+            st.pyplot(fig2)
+
+    # 3. SCATTER PLOT
+    with row2_col1:
+        st.subheader("3. Relación X vs Y (Scatter)")
+        feat_x = st.selectbox("Eje X:", cols_numericas, index=0, key="scat_x")
+        feat_y = st.selectbox("Eje Y:", cols_numericas, index=1, key="scat_y")
+        with st.spinner('Dibujando Dispersión...'):
+            fig3, ax3 = plt.subplots()
+            sns.scatterplot(data=data, x=feat_x, y=feat_y, alpha=0.5, ax=ax3)
+            ax3.set_title(f"{feat_x} frente a {feat_y}")
+            st.pyplot(fig3)
+
+    # 4. EVOLUCIÓN TEMPORAL (Solución al error de 'date')
+    with row2_col2:
+        st.subheader("4. Evolución Temporal")
+        feat_time = st.selectbox("Variable temporal:", ["tmed", "prec", "hrmedia", "tmax", "tmin"], key="time")
+        
+        with st.spinner('Cargando Serie Temporal...'):
+            # SOLUCIÓN: Si 'date' es el índice, lo recuperamos con .index
+            fig4, ax4 = plt.subplots()
+            
+            # Usamos data.index porque limpiar_datos hizo set_index('date')
+            ax4.plot(data.index, data[feat_time], color="orange", linewidth=0.5)
+            
+            ax4.set_title(f"Serie de tiempo: {feat_time}")
+            plt.xticks(rotation=45)
+            st.pyplot(fig4)
