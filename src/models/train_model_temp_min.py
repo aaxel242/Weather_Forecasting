@@ -93,7 +93,7 @@ def train_temp_min_model(df, model_path="src/models/modelo_tmin.pkl"):
 if __name__ == "__main__":
     # Carga de prueba
     try:
-        df_load = pd.read_csv('src/data/processed/data_weather_oficial.csv')
+        df_load = pd.read_csv('src/data/processed/data_weather_final.csv')
         train_temp_min_model(df_load)
     except FileNotFoundError:
         print("⚠️ No se encontró el dataset para prueba rápida.")

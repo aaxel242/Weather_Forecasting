@@ -1,43 +1,69 @@
 import os
 import streamlit as st
-from src.models.evaluation import evaluate_classification
 import joblib
+import pandas as pd
+from src.models.evaluation import evaluate_precipitation, evaluate_temperature
 
-def show_evaluation(data_imput):
-    # --- SECCIÓN DE EVALUACIÓN (CARGA DIRECTA) ---
-    st.divider()
-    st.header("Evaluación de Modelos Pre-entrenados")
-    
-    target_col = "bin_prep"
-    model_path_rf = "src/models/model_lluvia_RF.pkl"
-    model_path_lr = "src/models/model_lluvia_LR.pkl"
+def show_evaluation(data):
+    print("Evaluación de Modelos Pre-entrenados")
 
-    # Verificamos si los archivos existen antes de intentar cargarlos
-    if os.path.exists(model_path_rf) and os.path.exists(model_path_lr):
-        
-        # Preparar los datos para la predicción (mismo proceso que en el entrenamiento)
-        leaky = [target_col, "date", "fecha"]
-        features = data_imput.drop(columns=[c for c in leaky if c in data_imput.columns], errors='ignore')
-        labels = data_imput[target_col].astype(int)
-        
-        # Split para obtener el set de prueba (20%)
-        split = int(len(features) * 0.8)
-        X_test = features.iloc[split:]
-        y_true = labels.iloc[split:]
+    modelos = { 
+        "Modelo General de Lluvia": "src/models/modelo_lluvia.pkl", 
+        "Modelo de Temperatura Máxima": "src/models/modelo_tmax.pkl", 
+        "Modelo de Temperatura Mínima": "src/models/modelo_tmin.pkl" 
+    }
+
+    # Preparamos features y targets
+    leaky = ["bin_prep", "tmax", "tmin", "date", "fecha"]
+    X = data.drop(columns=[c for c in leaky if c in data.columns], errors="ignore")
+
+    y_lluvia = data["bin_prep"].astype(int) if "bin_prep" in data else None
+    y_tmax = data["tmax"] if "tmax" in data else None
+    y_tmin = data["tmin"] if "tmin" in data else None
+
+    # Split 80/20
+    split = int(len(X) * 0.8)
+    X_test = X.iloc[split:]
+
+    y_test_lluvia = y_lluvia.iloc[split:] if y_lluvia is not None else None
+    y_test_tmax = y_tmax.iloc[split:] if y_tmax is not None else None
+    y_test_tmin = y_tmin.iloc[split:] if y_tmin is not None else None
+
+    # Evaluación por modelo
+    for nombre, ruta in modelos.items():
+
+        if not os.path.exists(ruta):
+            st.warning(f"⚠️ {nombre} no encontrado en la ruta: {ruta}")
+            continue
 
         try:
-            # CARGAR MODELOS
-            model_rf = joblib.load(model_path_rf)
-            model_lr = joblib.load(model_path_lr)
+            modelo = joblib.load(ruta)
+            print(f"✅ {nombre} cargado correctamente.")
+            print(modelo)
 
-            # GENERAR PREDICCIONES
-            y_pred_rf = model_rf.predict(X_test)
-            y_pred_lr = model_lr.predict(X_test)
+            # -----------------------------
+            # CLASIFICACIÓN (lluvia)
+            # -----------------------------
+            if "Lluvia" in nombre:
+                y_pred = modelo.predict(X_test)
 
-            # MOSTRAR EVALUACIÓN
-            evaluate_classification(y_true, y_pred_rf, y_pred_lr)
-            
+                # evaluate_classification necesita 3 argumentos
+                # duplicamos y_pred para cumplir la firma
+                evaluate_precipitation(y_test_lluvia, y_pred)
+
+            # -----------------------------
+            # REGRESIÓN (tmax / tmin)
+            # -----------------------------
+            else:
+                y_true = y_test_tmax if "Máxima" in nombre else y_test_tmin
+                y_pred = modelo.predict(X_test)
+
+                evaluate_temperature(y_true, y_pred)
+
         except Exception as e:
-            st.error(f"Error al cargar o predecir con los modelos: {e}")
-    else:
-        st.warning("No se encontraron los archivos .pkl en 'src/models/'. Por favor, asegúrate de que los modelos estén entrenados y guardados.")
+            st.error(f"❌ Error al cargar {nombre}: {e}")
+
+
+# Cargar dataset correctamente
+df = pd.read_csv("src/data/processed/data_weather.csv")
+show_evaluation(df)
