@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-from PIL import Image
 
 # Importamos módulos
 from dashboard.ui.styles import apply_custom_styles
@@ -50,7 +49,23 @@ def main_frontend():
             st.error("⚠️ Error: No se pudieron cargar los modelos o los datos.")
             st.info(f"Ruta base detectada: {base_src}")
 
-    # 4. Sección EDA
+
+    # Seleccion de expansiones
+    
     st.markdown("---")
-    with st.expander("📊 Ver Análisis de Datos Históricos"):
-        render_eda_section()
+
+    col_1, col_2= st.columns([1, 1])
+
+    # 4. Sección EDA
+    with col_1 :
+        
+        with st.expander("📊 Ver Análisis de Datos Históricos"):
+            render_eda_section()
+    
+    with col_2 :
+        with st.expander("Ubicación de las estaciones Meteorológica"):
+            st.markdown("Museo Maritimo")
+            st.image("src/images/ubicacion_estación__museo_maritimo.png")
+            st.markdown("---")
+            st.markdown("Puerto Olimpico")
+            st.image("src/images/ubicacion_estación__puerto_olimpico.png")
