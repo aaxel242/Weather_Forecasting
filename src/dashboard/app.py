@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from PIL import Image
 
 # Importamos módulos
 from dashboard.ui.styles import apply_custom_styles
@@ -16,6 +17,12 @@ def main_frontend():
     apply_custom_styles()
     
     # 2. Header
+
+    # imagen inicio
+    col_izq, col_centro, col_der = st.columns([1, 1, 1])
+    with col_centro:
+        st.image("src/images/imagen_entrada.png")
+
     st.markdown("<h2 style='text-align: center; color: #f8fafc;'>🌦️ Predicción Meteorológica IA</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #94a3b8; margin-bottom: 1rem;'>Desliza el ratón sobre los días para ver recomendaciones</p>", unsafe_allow_html=True)
 
