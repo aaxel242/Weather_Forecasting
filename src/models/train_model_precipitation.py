@@ -6,7 +6,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import mean_absolute_error, r2_score
 
 def preparar_datos_lluvia(df):
     """Auxiliar para preparar features de lluvia"""
@@ -115,7 +114,7 @@ def train_models(df):
 if __name__ == "__main__":
     try:
         # Ajustamos ruta para ejecución directa
-        df_load = pd.read_csv('src/data/processed/data_weather_oficial.csv')
+        df_load = pd.read_csv('src/data/processed/data_weather_final.csv')
         train_models(df_load)
     except FileNotFoundError:
         print("⚠️ No se encontró el dataset.")

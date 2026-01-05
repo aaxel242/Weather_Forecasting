@@ -9,7 +9,7 @@ import os
 # Load the processed weather dataset
 dataset_weather = pd.read_csv('src/data/processed/data_weather_final.csv')
 # CONFIGURACIÓN
-RUTA_DATOS = 'src/data/processed/data_weather_oficial.csv'
+RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
 RUTA_MODELO = 'src/models/modelo_tmax.pkl'
 
 print("--- ENTRENANDO MODELO T_MAX ---")

@@ -2,68 +2,69 @@ import os
 import streamlit as st
 import joblib
 import pandas as pd
+import numpy as np
 from src.models.evaluation import evaluate_precipitation, evaluate_temperature
 
 def show_evaluation(data):
-    print("Evaluación de Modelos Pre-entrenados")
+    st.header("Evaluación de Modelos Pre-entrenados")
+    
+    modelos_config = [
+        {"nombre": "Modelo de Lluvia", "ruta": "src/models/modelo_lluvia.pkl", "tipo": "clasificacion"},
+        {"nombre": "Temperatura Máxima", "ruta": "src/models/modelo_tmax.pkl", "tipo": "regresion"},
+        {"nombre": "Temperatura Mínima", "ruta": "src/models/modelo_tmin.pkl", "tipo": "regresion"}
+    ]
 
-    modelos = { 
-        "Modelo General de Lluvia": "src/models/modelo_lluvia.pkl", 
-        "Modelo de Temperatura Máxima": "src/models/modelo_tmax.pkl", 
-        "Modelo de Temperatura Mínima": "src/models/modelo_tmin.pkl" 
-    }
+    for config in modelos_config:
+        with st.expander(f"Detalles: {config['nombre']}", expanded=True):
+            if not os.path.exists(config["ruta"]):
+                st.warning(f"No encontrado: {config['ruta']}")
+                continue
 
-    # Preparamos features y targets
-    leaky = ["bin_prep", "tmax", "tmin", "date", "fecha"]
-    X = data.drop(columns=[c for c in leaky if c in data.columns], errors="ignore")
+            try:
+                modelo = joblib.load(config["ruta"])
+                
+                # --- OBTENER LAS COLUMNAS QUE EL MODELO REALMENTE ESPERA ---
+                # Esto extrae los nombres de las columnas usados durante el entrenamiento
+                if hasattr(modelo, 'feature_names_in_'):
+                    features_esperadas = modelo.feature_names_in_
+                else:
+                    # Si usaste Pipeline con StandardScaler, a veces está en el clasificador
+                    features_esperadas = modelo.steps[-1][1].feature_names_in_
 
-    y_lluvia = data["bin_prep"].astype(int) if "bin_prep" in data else None
-    y_tmax = data["tmax"] if "tmax" in data else None
-    y_tmin = data["tmin"] if "tmin" in data else None
+                # --- PREPARAR EL DATAFRAME TEMPORAL ---
+                X_eval = data.copy()
 
-    # Split 80/20
-    split = int(len(X) * 0.8)
-    X_test = X.iloc[split:]
+                # 1. Corregir nombres (dia_del_anio -> dia_anio)
+                if 'dia_del_anio' in X_eval.columns:
+                    X_eval['dia_anio'] = X_eval['dia_del_anio']
+                
+                # 2. Crear tmax_yesterday y tmin_yesterday (Parece que tus modelos las necesitan)
+                if 'temp_max_lag1' in X_eval.columns:
+                    X_eval['tmax_yesterday'] = X_eval['temp_max_lag1']
+                if 'temp_min_lag1' in X_eval.columns:
+                    X_eval['tmin_yesterday'] = X_eval['temp_min_lag1']
 
-    y_test_lluvia = y_lluvia.iloc[split:] if y_lluvia is not None else None
-    y_test_tmax = y_tmax.iloc[split:] if y_tmax is not None else None
-    y_test_tmin = y_tmin.iloc[split:] if y_tmin is not None else None
+                # 3. Seleccionar SOLO las columnas que el modelo conoce y en el ORDEN correcto
+                # Esto soluciona el error de "Feature names unseen" y "missing"
+                try:
+                    X_test_final = X_eval[features_esperadas]
+                except KeyError as e:
+                    st.error(f"Faltan columnas críticas para este modelo: {e}")
+                    continue
 
-    # Evaluación por modelo
-    for nombre, ruta in modelos.items():
+                # --- PREDICCIÓN ---
+                split = int(len(X_test_final) * 0.8)
+                X_test_input = X_test_final.iloc[split:]
+                y_pred = modelo.predict(X_test_input)
 
-        if not os.path.exists(ruta):
-            st.warning(f"⚠️ {nombre} no encontrado en la ruta: {ruta}")
-            continue
+                # --- EVALUACIÓN (Igual que antes) ---
+                if config["tipo"] == "clasificacion":
+                    y_true = data["bin_prep"].iloc[split:].astype(int)
+                    evaluate_precipitation(y_true, y_pred, config["nombre"])
+                else:
+                    target_col = "tmax" if "Máxima" in config["nombre"] else "tmin"
+                    y_true = data[target_col].iloc[split:]
+                    evaluate_temperature(y_true, y_pred, config["nombre"])
 
-        try:
-            modelo = joblib.load(ruta)
-            print(f"✅ {nombre} cargado correctamente.")
-            print(modelo)
-
-            # -----------------------------
-            # CLASIFICACIÓN (lluvia)
-            # -----------------------------
-            if "Lluvia" in nombre:
-                y_pred = modelo.predict(X_test)
-
-                # evaluate_classification necesita 3 argumentos
-                # duplicamos y_pred para cumplir la firma
-                evaluate_precipitation(y_test_lluvia, y_pred)
-
-            # -----------------------------
-            # REGRESIÓN (tmax / tmin)
-            # -----------------------------
-            else:
-                y_true = y_test_tmax if "Máxima" in nombre else y_test_tmin
-                y_pred = modelo.predict(X_test)
-
-                evaluate_temperature(y_true, y_pred)
-
-        except Exception as e:
-            st.error(f"❌ Error al cargar {nombre}: {e}")
-
-
-# Cargar dataset correctamente
-df = pd.read_csv("src/data/processed/data_weather.csv")
-show_evaluation(df)
+            except Exception as e:
+                st.error(f"❌ Error en {config['nombre']}: {e}")
