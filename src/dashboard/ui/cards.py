@@ -28,12 +28,24 @@ def obtener_icono_tiempo(lluvia, tmin, tmax, nubes):
     return "sol.png"
 
 def obtener_consejo(tmin, tmax, lluvia):
-    t_avg = (tmin + tmax) / 2
-    if lluvia == 1: return "Lloverá. Lleva paraguas.", "paraguas.png"
-    if t_avg < 10: return "Hace frío. Abrígate.", "chaqueta.png"
-    if t_avg > 28: return "Mucho calor. Hidrátate.", "botella_de_agua.png"
-    if t_avg < 20: return "Refresca un poco.", "chaqueta.png"
-    return "Día agradable.", "sol.png"
+    # 1. Prioridad absoluta: Lluvia
+    if lluvia == 1: 
+        return "Lloverá. Lleva paraguas.", "lleva_paraguas.png"
+    
+    # 2. Frío por la mañana o por la tarde , horas extremas, sea alumno de mañana o de tarde. 
+    if tmin < 8: 
+        return "Mañana y tarde fría. Abrígate bien.", "abrigate.png"
+    
+    # 3. Si va ha hacer fresco , igual mañana o tarde avisamos de la chaqueta.
+    if tmin < 18:
+        return "Día fresco. No olvides una chaqueta.", "fresco.png"
+
+    # 4. Si va ha hacer Calor avisamos de hidratación
+    if tmax > 28: 
+        return "Mucho calor. Hidrátate y busca sombra.", "botella_de_agua.png"
+            
+    # 5. Buen tiempo
+    return "Día agradable.", "dia_agradable.png"
 
 def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
     """
@@ -84,10 +96,12 @@ def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
                     </div>
                     {badge}
                 </div>
-                <div class="card-back">
-                    <div class="tip-title">RECOMENDACIÓN</div>
-                    {img_tip}
-                    <div class="tip-text">{txt_tip}</div>
+
+                <div class="card-back" style="background-image: url('{b64_tip}');">
+                    <div class="overlay-consejo">
+                        <div class="tip-title">RECOMENDACIÓN</div>
+                        <div class="tip-spacer"></div> <div class="tip-text">{txt_tip}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,16 +192,51 @@ def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
         }}
 
         /* DISEÑO TRASERO */
+
         .card-back {{
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
+            position: relative;
             transform: rotateY(180deg);
+            border-radius: 16px;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
             border: 1px solid #60a5fa;
         }}
 
-        .tip-title {{ font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; opacity: 0.8; }}
-        .tip-icon {{ width: 40px; height: 40px; margin-bottom: 10px; }}
-        .tip-text {{ font-size: 13px; line-height: 1.4; font-weight: 500; }}
+        .overlay-consejo {{
+            background: transparent; 
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            padding: 20px 15px;
+            text-align: center
+        }}
+
+        .tip-title {{ 
+            font-size: 11px;
+            font-weight: 900;
+            color: #ffffff; /* Puedes ponerlo blanco o un color que resalte */
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,1), 0px 0px 8px rgba(0,0,0,0.8);
+        }}
+
+        .tip-spacer {{
+            flex-grow: 1; 
+        }}
+
+        .tip-text {{ 
+            font-size: 15px; 
+            font-weight: 800; 
+            color: #ffffff;
+            line-height: 1.2;
+            background: transparent; 
+            padding: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,1),   /* Sombra sólida desplazada */
+                         0px 0px 10px rgba(0,0,0,0.9), /* Brillo oscuro suave alrededor */
+                         0px 0px 20px rgba(0,0,0,0.8); /* Difuminado extra para profundidad */
+        }}
 
         /* RESPONSIVE: Scroll horizontal en móvil */
         @media (max-width: 800px) {{

@@ -54,18 +54,18 @@ def main_frontend():
     
     st.markdown("---")
 
-    col_1, col_2= st.columns([1, 1])
+
 
     # 4. Sección EDA
-    with col_1 :
-        
-        with st.expander("📊 Ver Análisis de Datos Históricos"):
+
+    with st.expander("📊 Ver Análisis de Datos Históricos"):
             render_eda_section()
     
-    with col_2 :
-        with st.expander("Ubicación de las estaciones Meteorológica"):
+    # Ubicaciones de las estaciones
+
+    with st.expander("Ubicación de las estaciones Meteorológica"):
             st.markdown("Museo Maritimo")
-            st.image("src/images/ubicacion_estación__museo_maritimo.png")
+            st.image("src/images/ubicacion_estación__museo_maritimo_s.png")
             st.markdown("---")
             st.markdown("Puerto Olimpico")
-            st.image("src/images/ubicacion_estación__puerto_olimpico.png")
+            st.image("src/images/ubicacion_estación__puerto_olimpico_s.png")

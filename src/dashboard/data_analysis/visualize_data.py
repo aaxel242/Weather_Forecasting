@@ -16,12 +16,12 @@ def visualization_Data(data):
     # Asegúrate de que los nombres de archivo coincidan exactamente con los que tienes en la carpeta
     imagenes_info = [
         {
-            "archivo": "manga_corta.png", 
+            "archivo": "pbi_temp.png", 
             "titulo": "Dashboard General",
             "info": "Resumen global de temperaturas y precipitaciones anuales."
         },
         {
-            "archivo": "paraguas.png", 
+            "archivo": "pbi_lluvia.png", 
             "titulo": "Análisis de precipitación",
             "info": "Relación humedad y precipitación."
         }
