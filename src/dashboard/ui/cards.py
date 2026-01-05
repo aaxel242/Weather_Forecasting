@@ -30,22 +30,22 @@ def obtener_icono_tiempo(lluvia, tmin, tmax, nubes):
 def obtener_consejo(tmin, tmax, lluvia):
     # 1. Prioridad absoluta: Lluvia
     if lluvia == 1: 
-        return "Lloverá. Lleva paraguas.", "lleva_paraguas.png"
+        return "llevate un paraguas", "lleva_paraguas.png"
     
     # 2. Frío por la mañana o por la tarde , horas extremas, sea alumno de mañana o de tarde. 
     if tmin < 8: 
-        return "Mañana y tarde fría. Abrígate bien.", "abrigate.png"
+        return " Hace frio, abrígate bien.", "abrigate.png"
     
     # 3. Si va ha hacer fresco , igual mañana o tarde avisamos de la chaqueta.
     if tmin < 18:
-        return "Día fresco. No olvides una chaqueta.", "fresco.png"
+        return "Día fresco. No olvides ponerte una chaqueta o sudadera.", "fresco.png"
 
     # 4. Si va ha hacer Calor avisamos de hidratación
     if tmax > 28: 
-        return "Mucho calor. Hidrátate y busca sombra.", "botella_de_agua.png"
+        return "Hidratate y vete por la sombra", "botella_de_agua.png"
             
     # 5. Buen tiempo
-    return "Día agradable.", "dia_agradable.png"
+    return "Hace un dia genial", "dia_agradable.png"
 
 def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
     """
