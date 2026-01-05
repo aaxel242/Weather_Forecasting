@@ -67,8 +67,8 @@ def train_rain_model_optimized():
     # 4. ENTRENAMIENTO
     # Aumentamos n_estimators y limitamos profundidad para evitar memorización
     model = RandomForestClassifier(
-        n_estimators=300, 
-        max_depth=15,       # Evita overfitting
+        n_estimators=500, 
+        max_depth=20,       # Evita overfitting
         class_weight='balanced', # Fuerza a prestar atención a la lluvia
         random_state=42, 
         n_jobs=-1
@@ -80,7 +80,7 @@ def train_rain_model_optimized():
     # Si la probabilidad de lluvia es > 0.35 (35%), predecimos Lluvia.
     
     y_probs = model.predict_proba(X_test)[:, 1] # Probabilidad de clase 1 (Lluvia)
-    UMBRAL_OPTIMO = 0.35  # <--- Hacemos al modelo más sensible
+    UMBRAL_OPTIMO = 0.26  # <--- Hacemos al modelo más sensible
     
     y_pred_ajustado = (y_probs >= UMBRAL_OPTIMO).astype(int)
     
