@@ -1,120 +1,117 @@
 import joblib
 import pandas as pd
+import numpy as np
 import os
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
-def preparar_datos_lluvia(df):
-    """Auxiliar para preparar features de lluvia"""
+# --- CONFIGURACIÓN ---
+RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
+RUTA_MODELO = 'src/models/modelo_lluvia.pkl'
+RUTA_FEATURES = 'src/models/features_lluvia.pkl'
 
-    df = df.copy()
+def train_rain_model_optimized():
+    print("\n--- ENTRENANDO MODELO LLUVIA (OPTIMIZADO: Delta Presión + Umbral) ---")
+    
+    try:
+        df = pd.read_csv(RUTA_DATOS)
+    except FileNotFoundError:
+        print(f"❌ Error: No se encuentra {RUTA_DATOS}")
+        return
 
-    # --- GENERACIÓN DE VARIABLES (CORRECCIÓN IMPORTANTE) ---
-    # Si no creamos esto, el modelo no encuentra 'mes' ni 'dia_anio' y falla luego
-    # -------------------------------------------------------
     if 'date' in df.columns:
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
-        df['mes'] = df['date'].dt.month
-        df['dia_anio'] = df['date'].dt.dayofyear
 
-    # Crear target binario si no existe
-    if 'bin_prep' not in df.columns and 'prec' in df.columns:
-        df['bin_prep'] = (df['prec'] > 0).astype(int)
+    # 1. VARIABLE OBJETIVO (Target)
+    df['target_rain'] = (df['prec'] > 0.1).astype(int)
+
+    # 2. INGENIERÍA DE CARACTERÍSTICAS MEJORADA 🌟
     
-    # --- FEATURES RECOMENDADAS ---
-    # He añadido dewpoint y lags que son vitales para la lluvia
-    features_list = [
-        'cloudcover__mean', 'cloudcover__max', 
-        'surface_pressure_hpa_mean', 'hrmedia', 'hrmax',
-        'dewpoint_2m_c_mean', 'precipitacion_lag1', 'precipitacion_lag7',
-        'mes', 'dia_del_anio', 'estacion_invierno', 'estacion_primavera'
+    # A. Lags Clásicos
+    df['prec_yesterday'] = df['prec'].shift(1)
+    df['rain_yesterday_bin'] = (df['prec_yesterday'] > 0.1).astype(int)
+    
+    # B. NUEVO: Tendencia de Presión (Pressure Delta)
+    # La caída de presión es el mejor predictor físico de tormentas
+    df['pressure_yesterday'] = df['surface_pressure_hpa_mean'].shift(1)
+    df['pressure_delta'] = df['surface_pressure_hpa_mean'] - df['pressure_yesterday'] 
+    # (Si es negativo significa que la presión está cayendo)
+
+    # C. Variables Temporales
+    df['mes'] = df['date'].dt.month
+    df['dia_anio'] = df['date'].dt.dayofyear
+    
+    df = df.dropna()
+
+    possible_features = [
+        'prec_yesterday', 'rain_yesterday_bin',
+        'pressure_delta',  # <--- VARIABLE CLAVE AÑADIDA
+        'surface_pressure_hpa_mean', 
+        'cloudcover__mean', 'cloudcover__max',
+        'hrmedia', 'hrmax',
+        'dewpoint_2m_c_mean',
+        'mes', 'dia_anio'
     ]
-    
-    # Ahora sí las encontrará porque las acabamos de crear
-    features_cols = [c for c in features_list if c in df.columns]
-    
-    return df[features_cols], df['bin_prep']
+    features_cols = [c for c in possible_features if c in df.columns]
 
-def train_classifier_model_LR(X_train, X_test, y_train, y_test, model_path):
-    print(f"\nTraining Logistic Regression...")
-    model = Pipeline([
-        ('scaler', StandardScaler()),
-        ('classifier', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))
-    ])
+    X = df[features_cols]
+    y = df['target_rain']
+
+    print(f"Features usadas: {features_cols}")
+
+    # 3. SPLIT
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
+
+    # 4. ENTRENAMIENTO
+    # Aumentamos n_estimators y limitamos profundidad para evitar memorización
+    model = RandomForestClassifier(
+        n_estimators=500, 
+        max_depth=20,       # Evita overfitting
+        class_weight='balanced', # Fuerza a prestar atención a la lluvia
+        random_state=42, 
+        n_jobs=-1
+    )
     model.fit(X_train, y_train)
+
+    # 5. EVALUACIÓN CON UMBRAL AJUSTADO (Threshold Tuning) 🌟
+    # En lugar de usar predict() directo (que corta en 0.5), usamos predict_proba()
+    # Si la probabilidad de lluvia es > 0.35 (35%), predecimos Lluvia.
     
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    print(f"📊 LR Accuracy: {acc:.4f}")
+    y_probs = model.predict_proba(X_test)[:, 1] # Probabilidad de clase 1 (Lluvia)
+    UMBRAL_OPTIMO = 0.26  # <--- Hacemos al modelo más sensible
     
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    joblib.dump(model, model_path)
-    return model, y_pred
-
-def train_classifier_model_RF(X_train, X_test, y_train, y_test, model_path):
-    print(f"\nTraining Random Forest Classifier...")
-    model = Pipeline([
-        ('scaler', StandardScaler()),
-        ('classifier', RandomForestClassifier(n_estimators=200, class_weight='balanced', random_state=42, n_jobs=-1))
-    ])
-    model.fit(X_train, y_train)
+    y_pred_ajustado = (y_probs >= UMBRAL_OPTIMO).astype(int)
     
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    print(f"📊 RF Accuracy: {acc:.4f}")
+    # Métricas
+    acc = accuracy_score(y_test, y_pred_ajustado)
+    prec = precision_score(y_test, y_pred_ajustado, zero_division=0)
+    rec = recall_score(y_test, y_pred_ajustado, zero_division=0)
+    f1 = f1_score(y_test, y_pred_ajustado, zero_division=0)
     
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    joblib.dump(model, model_path)
-    return model, y_pred
+    print(f"\n📊 RESULTADOS CON UMBRAL {UMBRAL_OPTIMO} (Más sensible):")
+    print(f"   - Recall (Sensibilidad): {rec:.4f} (¡Buscamos que esto suba!)")
+    print(f"   - Precision:             {prec:.4f}")
+    print(f"   - Accuracy:              {acc:.4f}")
+    print(f"   - F1-Score:              {f1:.4f}")
 
-def evaluate_classification(y_true, y_pred, model_name):
-    """Calcula métricas para modelos de clasificación"""
-    acc = accuracy_score(y_true, y_pred)
-    prec = precision_score(y_true, y_pred, zero_division=0)
-    rec = recall_score(y_true, y_pred, zero_division=0)
-    f1 = f1_score(y_true, y_pred, zero_division=0)
+    # Matriz de Confusión
+    cm = confusion_matrix(y_test, y_pred_ajustado)
+    print(f"\n   Matriz de Confusión Ajustada:")
+    print(f"   TN (Sol ok): {cm[0][0]} | FP (Falsa alarma): {cm[0][1]}")
+    print(f"   FN (Lluvia perdida): {cm[1][0]} | TP (Lluvia detectada): {cm[1][1]}")
 
-    print(f"\n--- Evaluación: {model_name} ---")
-    print(f"✅ Accuracy:  {acc:.4f}")
-    print(f"🎯 Precision: {prec:.4f} (Calidad de predicción de lluvia)")
-    print(f"📢 Recall:    {rec:.4f} (Capacidad de detectar lluvias reales)")
-    print(f"⚖️ F1-Score:  {f1:.4f}")
+    # NOTA IMPORTANTE:
+    # Random Forest standard de sklearn no permite guardar el umbral dentro del objeto .pkl.
+    # El umbral se aplica en la lógica de predicción.
+    # Aquí guardamos el modelo tal cual, pero en 'prediction_engine.py' aplicaremos el truco.
 
-def train_models(df):
-    print("\n--- ENTRENANDO MODELOS DE PRECIPITACIÓN ---")
-    
-    # Preparar datos (Ahora incluye mes y dia_anio)
-    X, y = preparar_datos_lluvia(df)
-    y = y.astype(int)
-    
-    split = int(len(X) * 0.8)
-    X_train, X_test = X.iloc[:split], X.iloc[split:]
-    y_train, y_test = y.iloc[:split], y.iloc[split:]
-
-    print(f"Datos entrenamiento: {len(X_train)} | Test: {len(X_test)}")
-    print(f"Features usadas: {list(X.columns)}")  # Para verificar
-
-    # Rutas
-    path_rf = "src/models/modelo_lluvia_rf.pkl"
-    path_lr = "src/models/modelo_lluvia_lr.pkl"
-
-    model_rf, y_pred_rf = train_classifier_model_RF(X_train, X_test, y_train, y_test, path_rf)
-    model_lr, y_pred_lr = train_classifier_model_LR(X_train, X_test, y_train, y_test, path_lr)
-
-    evaluate_classification(y_test, y_pred_rf, "Random Forest")
-    evaluate_classification(y_test, y_pred_lr, "Logistic Regression")
-
-    print(f"\n✅ Modelos de lluvia actualizados correctamente.")
-    return model_rf, y_pred_rf, model_lr, y_pred_lr
+    # 6. Guardado
+    os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
+    joblib.dump(model, RUTA_MODELO)
+    joblib.dump(features_cols, RUTA_FEATURES)
+    print(f"\n✅ Modelo guardado en: {RUTA_MODELO}")
 
 if __name__ == "__main__":
-    try:
-        # Ajustamos ruta para ejecución directa
-        df_load = pd.read_csv('src/data/processed/data_weather_final.csv')
-        train_models(df_load)
-    except FileNotFoundError:
-        print("⚠️ No se encontró el dataset.")
+    train_rain_model_optimized()

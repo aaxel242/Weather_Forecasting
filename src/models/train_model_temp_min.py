@@ -3,68 +3,59 @@ import numpy as np
 import joblib
 import os
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-def train_temp_min_model(df, model_path="src/models/modelo_tmin.pkl"):
-    """
-    Entrena un modelo de regresión para la temperatura mínima.
-    Recibe el DataFrame completo, genera lags y selecciona features óptimas.
-    """
-    print("\n--- ENTRENANDO MODELO T_MIN (Random Forest) ---")
+# --- CONFIGURACIÓN ---
+RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
+RUTA_MODELO = 'src/models/modelo_tmin.pkl'
+RUTA_FEATURES = 'src/models/features_tmin.pkl'
+
+def train_temp_min_model():
+    print("\n--- ENTRENANDO MODELO T_MIN (Con Métricas Completas) ---")
     
-    # 1. PREPARACIÓN DE DATOS (Feature Engineering interna)
+    # 1. Cargar y Ordenar
+    try:
+        df = pd.read_csv(RUTA_DATOS)
+    except FileNotFoundError:
+        print(f"❌ Error: No se encuentra {RUTA_DATOS}")
+        return
+
     if 'date' in df.columns:
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
     
-    # Generamos Lags si no existen
-    if 'tmin_yesterday' not in df.columns:
-        df['tmin_yesterday'] = df['tmin'].shift(1)
-        
-    # Variables temporales
+    # 2. Features y Lags
+    # La mínima depende mucho de la máxima de ayer y de las nubes nocturnas
+    df['tmin_yesterday'] = df['tmin'].shift(1)
+    df['tmax_yesterday'] = df['tmax'].shift(1)
+    
     df['mes'] = df['date'].dt.month
     df['dia_anio'] = df['date'].dt.dayofyear
     
-    # Limpiamos nulos generados por el lag
     df = df.dropna()
 
-    # Selección de Features Óptimas (Basado en análisis previo)
-    features_list = [
-        'tmin_yesterday',       # La inercia térmica (CRUCIAL)
-        'dewpoint_2m_c_min',    # Relación física directa
-        'dewpoint_2m_c_mean',
-        'dia_anio', 'mes',      # Estacionalidad
-        'estacion_invierno', 'estacion_verano',
-        'cloudcover__min',      # Nubes nocturnas (evitan heladas)
-        'cloudcover__mean'
+    possible_features = [
+        'tmin_yesterday', 'tmax_yesterday',
+        'dia_anio', 'mes',
+        'dewpoint_2m_c_min', 'dewpoint_2m_c_mean',
+        'cloudcover__min', 'cloudcover__mean'
     ]
-    
-    # Filtramos para asegurar que solo usamos columnas que existen
-    features_cols = [c for c in features_list if c in df.columns]
+    features_cols = [c for c in possible_features if c in df.columns]
     
     X = df[features_cols]
     y = df['tmin']
 
-    # 2. SPLIT (Respetando orden temporal)
-    split = int(len(X) * 0.8)
-    X_train, X_test = X.iloc[:split], X.iloc[split:]
-    y_train, y_test = y.iloc[:split], y.iloc[split:]
-
     print(f"Features usadas: {features_cols}")
-    print(f"Datos de entrenamiento: {len(X_train)} | Test: {len(X_test)}")
 
-    # 3. PIPELINE Y ENTRENAMIENTO
-    model = Pipeline([
-        ('scaler', StandardScaler()), # Normalizamos (buena práctica aunque sea RF)
-        ('regressor', RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1))
-    ])
+    # 3. Split (Shuffle=False)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
 
-    # Entrenamos
+    # 4. Entrenamiento
+    model = RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)
     model.fit(X_train, y_train)
     
-    # 4. EVALUACIÓN
+    # 5. Evaluación Completa
     y_pred = model.predict(X_test)
     
     mae = mean_absolute_error(y_test, y_pred)
@@ -72,28 +63,17 @@ def train_temp_min_model(df, model_path="src/models/modelo_tmin.pkl"):
     rmse = np.sqrt(mse)
     r2 = r2_score(y_test, y_pred)
 
-    print(f"📊 RESULTADOS T_MIN:")
-    print(f"   - MAE (Error Medio): {mae:.4f} °C")
-    print(f"   - RMSE: {rmse:.4f} °C")
-    print(f"   - R² Score: {r2:.4f}")
+    print("\n📊 RESULTADOS EVALUACIÓN T_MIN:")
+    print(f"   - MAE  (Error Medio Absoluto): {mae:.4f} °C")
+    print(f"   - MSE  (Error Cuadrático):     {mse:.4f}")
+    print(f"   - RMSE (Raíz Error Cuad.):     {rmse:.4f} °C")
+    print(f"   - R²   (Precisión General):    {r2:.4f}")
 
-    # 5. GUARDADO
-    # Usamos ruta absoluta para evitar errores
-    base_dir = os.getcwd()
-    abs_model_path = os.path.join(base_dir, model_path)
-    
-    os.makedirs(os.path.dirname(abs_model_path), exist_ok=True)
-    joblib.dump(model, abs_model_path)
-    print(f"✅ Modelo guardado en: {abs_model_path}")
-    
-    predictions = pd.Series(y_pred, index=y_test.index)
-    return model, predictions
+    # 6. Guardado
+    os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
+    joblib.dump(model, RUTA_MODELO)
+    joblib.dump(features_cols, RUTA_FEATURES)
+    print(f"\n✅ Modelo guardado en: {RUTA_MODELO}")
 
-# Bloque para ejecutar este script directamente si se desea
 if __name__ == "__main__":
-    # Carga de prueba
-    try:
-        df_load = pd.read_csv('src/data/processed/data_weather_final.csv')
-        train_temp_min_model(df_load)
-    except FileNotFoundError:
-        print("⚠️ No se encontró el dataset para prueba rápida.")
+    train_temp_min_model()
