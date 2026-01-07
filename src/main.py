@@ -6,7 +6,6 @@ import os
 # IMPORTANTE: Esto debe ser siempre el primer comando de Streamlit
 st.set_page_config(
     page_title="Weather AI",
-    page_icon="🌦️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )

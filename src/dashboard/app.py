@@ -22,7 +22,7 @@ def main_frontend():
     with col_centro:
         st.image("src/images/imagen_entrada.png")
 
-    st.markdown("<h2 style='text-align: center; color: #f8fafc;'>🌦️ Predicción Meteorológica IA</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #f8fafc;'>Predicción Meteorológica IA</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #94a3b8; margin-bottom: 1rem;'>Desliza el ratón sobre los días para ver recomendaciones</p>", unsafe_allow_html=True)
 
     # 3. Lógica del Backend
@@ -58,7 +58,7 @@ def main_frontend():
 
     # 4. Sección EDA
 
-    with st.expander("📊 Ver Análisis de Datos Históricos"):
+    with st.expander("Ver Análisis de Datos Históricos"):
             render_eda_section()
     
     # Ubicaciones de las estaciones
