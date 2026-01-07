@@ -30,33 +30,35 @@ def show_evaluation(data):
                     df_temp['date'] = pd.to_datetime(df_temp['date'])
                     df_temp = df_temp.sort_values('date')
 
-                if config["tipo"] == "clasificacion":
-                    # Mapeos para LLUVIA
-                    target_col = "bin_prep"
-                    if 'precipitacion_lag1' in df_temp.columns:
-                        df_temp['prec_yesterday'] = df_temp['precipitacion_lag1']
-                        df_temp['rain_yesterday_bin'] = (df_temp['prec_yesterday'] > 0.1).astype(int)
-                    
-                    if 'dia_del_anio' in df_temp.columns:
-                        df_temp['dia_anio'] = df_temp['dia_del_anio']
+                # Mapeos para LLUVIA
+                if 'precipitacion_lag1' in df_temp.columns:
+                    df_temp['prec_yesterday'] = df_temp['precipitacion_lag1']
+                    df_temp['rain_yesterday_bin'] = (df_temp['prec_yesterday'] > 0.1).astype(int)
+                
+                if 'dia_del_anio' in df_temp.columns:
+                    df_temp['dia_anio'] = df_temp['dia_del_anio']
 
-                    if 'surface_pressure_hpa_mean' in df_temp.columns:
-                        # Calculamos el delta de presión (diferencia con el día anterior)
-                        df_temp['pressure_delta'] = df_temp['surface_pressure_hpa_mean'].diff()
+                if 'surface_pressure_hpa_mean' in df_temp.columns:
+                    # Calculamos el delta de presión (diferencia con el día anterior)
+                    df_temp['pressure_delta'] = df_temp['surface_pressure_hpa_mean'].diff()
 
                 # Mapeos para TEMPERATURA
                 if 'temp_max_lag1' in df_temp.columns:
                     df_temp['tmax_yesterday'] = df_temp['temp_max_lag1']
                 if 'temp_min_lag1' in df_temp.columns:
                     df_temp['tmin_yesterday'] = df_temp['temp_min_lag1']
-                
-                target_col = "tmax" if "Máxima" in config["nombre"] else "tmin"
 
                 # --- 2. IDENTIFICAR COLUMNAS REQUERIDAS ---
                 if hasattr(modelo, 'feature_names_in_'):
                     features_modelo = list(modelo.feature_names_in_)
                 else:
                     features_modelo = list(modelo.steps[-1][1].feature_names_in_)
+
+                # Definir Target según el modelo
+                if config["tipo"] == "clasificacion":
+                    target_col = "bin_prep"
+                else:
+                    target_col = "tmax" if "Máxima" in config["nombre"] else "tmin"
 
                 # --- 3. LIMPIEZA DE FILAS (Sincronización de X e y) ---
                 # Eliminamos filas donde falte alguna feature o el target
