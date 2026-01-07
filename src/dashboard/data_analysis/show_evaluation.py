@@ -22,48 +22,67 @@ def show_evaluation(data):
 
             try:
                 modelo = joblib.load(config["ruta"])
+                # Trabajamos sobre una copia limpia para cada modelo
+                df_temp = data.copy()
+
+                # --- 1. PREPARACIÓN DE COLUMNAS (Mapeo del CSV al Modelo) ---
+                if 'date' in df_temp.columns:
+                    df_temp['date'] = pd.to_datetime(df_temp['date'])
+                    df_temp = df_temp.sort_values('date')
+
+                if config["tipo"] == "clasificacion":
+                    # Mapeos para LLUVIA
+                    target_col = "bin_prep"
+                    if 'precipitacion_lag1' in df_temp.columns:
+                        df_temp['prec_yesterday'] = df_temp['precipitacion_lag1']
+                        df_temp['rain_yesterday_bin'] = (df_temp['prec_yesterday'] > 0.1).astype(int)
+                    
+                    if 'dia_del_anio' in df_temp.columns:
+                        df_temp['dia_anio'] = df_temp['dia_del_anio']
+
+                    if 'surface_pressure_hpa_mean' in df_temp.columns:
+                        # Calculamos el delta de presión (diferencia con el día anterior)
+                        df_temp['pressure_delta'] = df_temp['surface_pressure_hpa_mean'].diff()
+
+                # Mapeos para TEMPERATURA
+                if 'temp_max_lag1' in df_temp.columns:
+                    df_temp['tmax_yesterday'] = df_temp['temp_max_lag1']
+                if 'temp_min_lag1' in df_temp.columns:
+                    df_temp['tmin_yesterday'] = df_temp['temp_min_lag1']
                 
-                # --- OBTENER LAS COLUMNAS QUE EL MODELO REALMENTE ESPERA ---
-                # Esto extrae los nombres de las columnas usados durante el entrenamiento
+                target_col = "tmax" if "Máxima" in config["nombre"] else "tmin"
+
+                # --- 2. IDENTIFICAR COLUMNAS REQUERIDAS ---
                 if hasattr(modelo, 'feature_names_in_'):
-                    features_esperadas = modelo.feature_names_in_
+                    features_modelo = list(modelo.feature_names_in_)
                 else:
-                    # Si usaste Pipeline con StandardScaler, a veces está en el clasificador
-                    features_esperadas = modelo.steps[-1][1].feature_names_in_
+                    features_modelo = list(modelo.steps[-1][1].feature_names_in_)
 
-                # --- PREPARAR EL DATAFRAME TEMPORAL ---
-                X_eval = data.copy()
+                # --- 3. LIMPIEZA DE FILAS (Sincronización de X e y) ---
+                # Eliminamos filas donde falte alguna feature o el target
+                columnas_necesarias = features_modelo + [target_col]
+                df_clean = df_temp.dropna(subset=columnas_necesarias)
 
-                # 1. Corregir nombres (dia_del_anio -> dia_anio)
-                if 'dia_del_anio' in X_eval.columns:
-                    X_eval['dia_anio'] = X_eval['dia_del_anio']
-                
-                # 2. Crear tmax_yesterday y tmin_yesterday (Parece que tus modelos las necesitan)
-                if 'temp_max_lag1' in X_eval.columns:
-                    X_eval['tmax_yesterday'] = X_eval['temp_max_lag1']
-                if 'temp_min_lag1' in X_eval.columns:
-                    X_eval['tmin_yesterday'] = X_eval['temp_min_lag1']
-
-                # 3. Seleccionar SOLO las columnas que el modelo conoce y en el ORDEN correcto
-                # Esto soluciona el error de "Feature names unseen" y "missing"
-                try:
-                    X_test_final = X_eval[features_esperadas]
-                except KeyError as e:
-                    st.error(f"Faltan columnas críticas para este modelo: {e}")
+                if df_clean.empty:
+                    st.error(f"No hay datos suficientes para evaluar {config['nombre']} tras limpiar NaNs.")
                     continue
 
-                # --- PREDICCIÓN ---
-                split = int(len(X_test_final) * 0.8)
-                X_test_input = X_test_final.iloc[split:]
-                y_pred = modelo.predict(X_test_input)
+                # --- 4. DIVISIÓN Y PREDICCIÓN ---
+                # Ahora X e y salen del MISMO dataframe limpio
+                X = df_clean[features_modelo]
+                y = df_clean[target_col]
 
-                # --- EVALUACIÓN (Igual que antes) ---
+                split_idx = int(len(X) * 0.8)
+                X_test = X.iloc[split_idx:]
+                y_true = y.iloc[split_idx:]
+
                 if config["tipo"] == "clasificacion":
-                    y_true = data["bin_prep"].iloc[split:].astype(int)
+                    # Aplicamos el umbral de 0.26 para lluvia
+                    y_probs = modelo.predict_proba(X_test)[:, 1]
+                    y_pred = (y_probs >= 0.26).astype(int)
                     evaluate_precipitation(y_true, y_pred, config["nombre"])
                 else:
-                    target_col = "tmax" if "Máxima" in config["nombre"] else "tmin"
-                    y_true = data[target_col].iloc[split:]
+                    y_pred = modelo.predict(X_test)
                     evaluate_temperature(y_true, y_pred, config["nombre"])
 
             except Exception as e:
