@@ -5,6 +5,8 @@ from datetime import timedelta
 import pandas as pd
 import streamlit.components.v1 as components
 
+"""tarjetas que giran"""
+
 def img_to_base64(path):
     """Convierte imagen a string base64"""
     if not os.path.exists(path):
@@ -87,9 +89,9 @@ def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
         b64_main = img_to_base64(os.path.join(images_dir, icon_name))
         b64_tip = img_to_base64(os.path.join(images_dir, icon_tip_name))
         
-        img_main = f'<img src="{b64_main}" class="main-icon">' if b64_main else '<div style="font-size:40px">⛅</div>'
-        img_tip = f'<img src="{b64_tip}" class="tip-icon">' if b64_tip else '<div style="font-size:30px">💡</div>'
-        badge = '<div class="badge-rain">💧 Lluvia</div>' if val_rain == 1 else ''
+        img_main = f'<img src="{b64_main}" class="main-icon">' if b64_main else '<div style="font-size:40px"></div>'
+        img_tip = f'<img src="{b64_tip}" class="tip-icon">' if b64_tip else '<div style="font-size:30px"></div>'
+        badge = '<div class="badge-rain">Lluvia</div>' if val_rain == 1 else ''
 
         cards_html += f"""
         <div class="card">

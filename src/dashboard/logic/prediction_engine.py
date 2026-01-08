@@ -5,6 +5,11 @@ import numpy as np
 import os
 from datetime import timedelta
 
+
+"""
+    Carga los modelos y mostrar las predicciones para los próximos 7 días.
+"""
+
 @st.cache_resource
 def cargar_modelos(base_path):
     """

@@ -24,14 +24,8 @@ def train_rain_model_optimized():
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
 
-    # 1. VARIABLE OBJETIVO (Target)
-    df['target_rain'] = (df['prec'] > 0.1).astype(int)
-
-    # 2. INGENIERÍA DE CARACTERÍSTICAS MEJORADA 🌟
-    
     # A. Lags Clásicos
-    df['prec_yesterday'] = df['prec'].shift(1)
-    df['rain_yesterday_bin'] = (df['prec_yesterday'] > 0.1).astype(int)
+    df['rain_yesterday_bin'] = (df['precipitacion_lag1'] > 0.1).astype(int)
     
     # B. NUEVO: Tendencia de Presión (Pressure Delta)
     # La caída de presión es el mejor predictor físico de tormentas
@@ -40,24 +34,24 @@ def train_rain_model_optimized():
     # (Si es negativo significa que la presión está cayendo)
 
     # C. Variables Temporales
-    df['mes'] = df['date'].dt.month
-    df['dia_anio'] = df['date'].dt.dayofyear
+    # df['mes'] = df['date'].dt.month
+    # df['dia_anio'] = df['date'].dt.dayofyear
     
     df = df.dropna()
 
     possible_features = [
-        'prec_yesterday', 'rain_yesterday_bin',
+        'precipitacion_lag1', 'rain_yesterday_bin',
         'pressure_delta',  # <--- VARIABLE CLAVE AÑADIDA
         'surface_pressure_hpa_mean', 
         'cloudcover__mean', 'cloudcover__max',
         'hrmedia', 'hrmax',
         'dewpoint_2m_c_mean',
-        'mes', 'dia_anio'
+        'mes', 'dia_del_anio'
     ]
     features_cols = [c for c in possible_features if c in df.columns]
 
     X = df[features_cols]
-    y = df['target_rain']
+    y = df['bin_prep']
 
     print(f"Features usadas: {features_cols}")
 
