@@ -42,7 +42,6 @@ y_train, y_test = labels.iloc[:split], labels.iloc[split:]
 # ============================================
 print("Entrenando Random Forest...")
 model_rf = Pipeline([
-    ('scaler', StandardScaler()),
     ('classifier', RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=42))
 ])
 
@@ -73,7 +72,6 @@ print(f"\n{classification_report(y_test, predictions_rf)}")
 # ============================================
 print("\n\nEntrenando Logistic Regression...")
 model_lr = Pipeline([
-    ('scaler', StandardScaler()),
     ('classifier', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))
 ])
 

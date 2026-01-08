@@ -6,7 +6,7 @@ import pandas as pd
 
 def predict_with_model(model_path_lr, model_path_rf, features, rango):
     st.markdown("---")
-    st.header(f"🌦️ Predicción Meteorológica - {rango} Días")
+    st.header(f"Predicción Meteorológica - {rango} Días")
     
     if os.path.exists(model_path_rf) and os.path.exists(model_path_lr):
         model_rf = joblib.load(model_path_rf)
@@ -20,7 +20,7 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         fechas = [fecha_inicio + timedelta(days=i) for i in range(rango)]
         
         # TAB 1: Random Forest
-        tab1, tab2 = st.tabs(["🌳 Random Forest", "📊 Regresión Logística"])
+        tab1, tab2 = st.tabs(["Random Forest", "Regresión Logística"])
         
         with tab1:
             st.subheader("Pronóstico del Modelo Random Forest")
@@ -89,7 +89,7 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         
         # RESUMEN ESTADÍSTICO
         st.markdown("---")
-        st.subheader("📈 Estadísticas del Pronóstico")
+        st.subheader("Estadísticas del Pronóstico")
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -97,20 +97,20 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         dias_lluvia_lr = sum(predicciones_lr)
         
         with col1:
-            st.metric("☔ Días lluvia (RF)", f"{dias_lluvia_rf}/{rango}")
+            st.metric("Días lluvia (RF)", f"{dias_lluvia_rf}/{rango}")
         with col2:
-            st.metric("☀️ Días seco (RF)", f"{rango-dias_lluvia_rf}/{rango}")
+            st.metric("Días seco (RF)", f"{rango-dias_lluvia_rf}/{rango}")
         with col3:
-            st.metric("☔ Días lluvia (LR)", f"{dias_lluvia_lr}/{rango}")
+            st.metric("Días lluvia (LR)", f"{dias_lluvia_lr}/{rango}")
         with col4:
-            st.metric("☀️ Días seco (LR)", f"{rango-dias_lluvia_lr}/{rango}")
+            st.metric("Días seco (LR)", f"{rango-dias_lluvia_lr}/{rango}")
         
     else:
-        st.error("❌ Error: Primero debes entrenar el modelo seleccionado en el menú lateral.")
+        st.error("Error: Primero debes entrenar el modelo seleccionado en el menú lateral.")
 
 def predict_with_model(model_path_lr, model_path_rf, features, rango):
     st.markdown("---")
-    st.header(f"🌦️ Predicción Meteorológica - {rango} Días")
+    st.header(f"Predicción Meteorológica - {rango} Días")
     
     if os.path.exists(model_path_rf) and os.path.exists(model_path_lr):
         model_rf = joblib.load(model_path_rf)
@@ -124,7 +124,7 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         fechas = [fecha_inicio + timedelta(days=i) for i in range(rango)]
         
         # TAB 1: Random Forest
-        tab1, tab2 = st.tabs(["🌳 Random Forest", "📊 Regresión Logística"])
+        tab1, tab2 = st.tabs(["Random Forest", "Regresión Logística"])
         
         with tab1:
             st.subheader("Pronóstico del Modelo Random Forest")
@@ -193,7 +193,7 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         
         # RESUMEN ESTADÍSTICO
         st.markdown("---")
-        st.subheader("📈 Estadísticas del Pronóstico")
+        st.subheader("Estadísticas del Pronóstico")
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -201,16 +201,16 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
         dias_lluvia_lr = sum(predicciones_lr)
         
         with col1:
-            st.metric("☔ Días lluvia (RF)", f"{dias_lluvia_rf}/{rango}")
+            st.metric("Días lluvia (RF)", f"{dias_lluvia_rf}/{rango}")
         with col2:
-            st.metric("☀️ Días seco (RF)", f"{rango-dias_lluvia_rf}/{rango}")
+            st.metric("Días seco (RF)", f"{rango-dias_lluvia_rf}/{rango}")
         with col3:
-            st.metric("☔ Días lluvia (LR)", f"{dias_lluvia_lr}/{rango}")
+            st.metric("Días lluvia (LR)", f"{dias_lluvia_lr}/{rango}")
         with col4:
-            st.metric("☀️ Días seco (LR)", f"{rango-dias_lluvia_lr}/{rango}")
+            st.metric("Días seco (LR)", f"{rango-dias_lluvia_lr}/{rango}")
         
     else:
-        st.error("❌ Error: Primero debes entrenar el modelo seleccionado en el menú lateral.")
+        st.error("Error: Primero debes entrenar el modelo seleccionado en el menú lateral.")
 
 
 #  Temperatura Mínima

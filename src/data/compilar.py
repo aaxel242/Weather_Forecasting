@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import streamlit as st
-from utils.unir_json import unir_json_a_csv
+from data.unir_json import unir_json_a_csv
 
 def compilar_datos():
     """

@@ -1,66 +1,94 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import prophet as prophet
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 def correlation_heatmap(data):
-        # 2. Correlaciones
-    with st.expander("🔗 Correlaciones"):
-        st.subheader("🔗 Correlaciones")
-        data_numeric = data.select_dtypes(include=["float", "int"])
+    st.title("Correlaciones")
+    data_numeric = data.select_dtypes(include=[np.number]).dropna()
+    
+    if len(data_numeric) < 2:
+        st.warning("No hay suficientes datos numéricos.")
+    else:
+        # 1. Heatmap (Visualización general)
+        corr = data_numeric.corr()
+        fig, ax = plt.subplots(figsize=(25, 15))
+        sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
         
-        if len(data_numeric) < 2:
-            st.warning("⚠️ No se puede calcular la correlación: El conjunto de datos numérico tiene menos de 2 filas.")
-        else:
-            corr = data_numeric.corr()
-            fig, ax = plt.subplots(figsize=(10, 6))
-            sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
-            st.pyplot(fig)
+        p_values_matrix = correlation_pvalue_matrix(data_numeric) 
+
+        st.divider()
+        st.subheader("Variables con Correlación Significativa (p ≤ 0.05)")
+        
+        st.info("""
+        **Guía de interpretación:**
+        * **p-value:** Probabilidad de error. Solo se muestran valores que, tras el redondeo, son mayores a 0.0000.
+        * **Correlación:** Fuerza de la relación (de -1 a 1).
+        """)
+
+        significant_list = []
+        cols = p_values_matrix.columns
+        
+        # Queremos mostrar 4 decimales
+        precision = 4
+        
+        for i in range(len(cols)):
+            for j in range(i + 1, len(cols)):
+                p_val = p_values_matrix.iloc[i, j]
+                
+                # PASO 1: Redondeamos primero el valor
+                p_val_rounded = round(float(p_val), precision)
+                
+                # PASO 2: Solo si el redondeado es estrictamente mayor que 0
+                # Esto elimina CUALQUIER valor que Streamlit fuera a mostrar como 0.0000
+                if 0 < p_val_rounded <= 0.05:
+                    significant_list.append({
+                        "Variable 1": cols[i],
+                        "Variable 2": cols[j],
+                        "p-value": p_val_rounded,
+                        "Correlación": round(float(corr.iloc[i, j]), 2)
+                    })
+
+        if significant_list:
+            df_signif = pd.DataFrame(significant_list)
+            # Ordenamos por p-value (los más creíbles primero)
+            df_signif = df_signif.sort_values("p-value")
             
-            p_values = correlation_pvalue_matrix(data_numeric) 
-            st.write("Variables con correlación significativa (p <= 0.05):")
-            st.write(p_values)
+            # PASO 3: Forzamos a Streamlit a mostrar los decimales para confirmar que no hay ceros
+            st.dataframe(
+                df_signif, 
+                use_container_width=True, 
+                hide_index=True
+            )
+        else:
+            st.info("No se encontraron correlaciones con p-value visible (mayores a 0.0000).")
 
-def correlation_pvalue_matrix(
-    df: pd.DataFrame
-) -> pd.DataFrame:
+def correlation_pvalue_matrix(df: pd.DataFrame, method: str = "pearson") -> pd.DataFrame:
     """
-    Computes a matrix of p-values for pairwise correlations.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Numerical dataframe.
-    method : CorrelationMethods
-        Correlation method.
-
-    Returns
-    -------
-    pd.DataFrame
-        Matrix of p-values.
+    Calcula una matriz de p-values para las correlaciones por pares.
     """
-    p_values_final = []
-    method = "pearson"
+    df = df.loc[:, df.std() > 0]
     cols = df.columns
     pvals = pd.DataFrame(index=cols, columns=cols, dtype=float)
 
     for c1 in cols:
         for c2 in cols:
-            if method is method:
-                _, p = pearsonr(df[c1], df[c2])
+            if c1 == c2:
+                pvals.loc[c1, c2] = 0.0
+                continue
+            
+            try:
+                if method == "pearson":
+                    _, p = pearsonr(df[c1], df[c2])
+                elif method == "spearman":
+                    _, p = spearmanr(df[c1], df[c2])
+                elif method == "kendall":
+                    _, p = kendalltau(df[c1], df[c2])
+                pvals.loc[c1, c2] = p
+            except:
+                pvals.loc[c1, c2] = np.nan
                 
-                st.info(f"{df[c1]} y {df[c2]}")
-                if ((_ and p) <= 0.05) and ([c1] != [c2]):
-                    p_values_final.append(c1)
-                    p_values_final.append(c2)
-            elif method is method:
-                _, p = spearmanr(df[c1], df[c2])
-            else:
-                _, p = kendalltau(df[c1], df[c2])
-            pvals.loc[c1, c2] = p
-
-    return p_values_final
+    return pvals

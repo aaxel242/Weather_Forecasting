@@ -1,11 +1,22 @@
 import streamlit as st
 import os
+import sys
 
 # Importamos módulos
-from dashboard.ui.styles import apply_custom_styles
-from dashboard.ui.cards import generar_grid_html
-from dashboard.logic.prediction_engine import cargar_modelos, preparar_datos_prediccion, ejecutar_predicciones
-from dashboard.data_analysis.eda import render_eda_section
+from src.dashboard.ui.styles import apply_custom_styles
+from src.dashboard.ui.cards import generar_grid_html
+from src.scripts.prediction_engine import cargar_modelos, preparar_datos_prediccion, ejecutar_predicciones
+from src.scripts.eda import render_eda_section
+
+st.set_page_config(
+    page_title="Weather AI",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# if current_dir not in sys.path:
+#     sys.path.append(current_dir)
 
 def main_frontend():
     """
@@ -54,8 +65,6 @@ def main_frontend():
     
     st.markdown("---")
 
-
-
     # 4. Sección EDA
 
     with st.expander("Ver Análisis de Datos Históricos"):
@@ -69,3 +78,7 @@ def main_frontend():
             st.markdown("---")
             st.markdown("Puerto Olimpico")
             st.image("src/images/ubicacion_estación__puerto_olimpico_s.png")
+
+
+if __name__ == "__main__":
+        main_frontend()
