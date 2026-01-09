@@ -21,6 +21,7 @@ def train_rain_model_optimized():
         return
 
     if 'date' in df.columns:
+        # convierte la columna date en datetime y ordena cornologicamente
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
 
@@ -32,46 +33,41 @@ def train_rain_model_optimized():
     df['pressure_yesterday'] = df['surface_pressure_hpa_mean'].shift(1)
     df['pressure_delta'] = df['surface_pressure_hpa_mean'] - df['pressure_yesterday'] 
     # (Si es negativo significa que la presión está cayendo)
-
-    # C. Variables Temporales
-    # df['mes'] = df['date'].dt.month
-    # df['dia_anio'] = df['date'].dt.dayofyear
     
-    df = df.dropna()
+    # df = df.dropna()
 
-    possible_features = [
+    features_cols = [
         'precipitacion_lag1', 'rain_yesterday_bin',
-        'pressure_delta',  # <--- VARIABLE CLAVE AÑADIDA
+        'pressure_delta', 
         'surface_pressure_hpa_mean', 
         'cloudcover__mean', 'cloudcover__max',
         'hrmedia', 'hrmax',
         'dewpoint_2m_c_mean',
         'mes', 'dia_del_anio'
     ]
-    features_cols = [c for c in possible_features if c in df.columns]
 
-    X = df[features_cols]
+    x = df[features_cols]
     y = df['bin_prep']
 
     print(f"Features usadas: {features_cols}")
 
     # 3. SPLIT
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=False, random_state=42)
 
     # 4. ENTRENAMIENTO
     # Aumentamos n_estimators y limitamos profundidad para evitar memorización
     model = RandomForestClassifier(
         n_estimators=500, 
-        max_depth=20,       # Evita overfitting
-        class_weight='balanced', # Fuerza a prestar atención a la lluvia
+        max_depth=20,      
+        class_weight='balanced',
         random_state=42, 
         n_jobs=-1
     )
     model.fit(X_train, y_train)
 
-    # 5. EVALUACIÓN CON UMBRAL AJUSTADO (Threshold Tuning) 🌟
+    # 5. EVALUACIÓN CON UMBRAL AJUSTADO (Threshold Tuning)
     # En lugar de usar predict() directo (que corta en 0.5), usamos predict_proba()
-    # Si la probabilidad de lluvia es > 0.35 (35%), predecimos Lluvia.
+    # Si la probabilidad de lluvia es > 0.26 (26%), predecimos Lluvia.
     
     y_probs = model.predict_proba(X_test)[:, 1] # Probabilidad de clase 1 (Lluvia)
     UMBRAL_OPTIMO = 0.26  # <--- Hacemos al modelo más sensible
