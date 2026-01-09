@@ -21,6 +21,7 @@ dependencies = [
     "seaborn>=0.13.2",
     "prophet>=1.2.1",
     "plotly>=6.5.0",
+    "imbalanced-learn>=0.14.1",
 ]
 
 [project.optional-dependencies]
