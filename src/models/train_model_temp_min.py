@@ -8,8 +8,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # --- CONFIGURACIÓN ---
 RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
-RUTA_MODELO = 'src/models/modelo_tmin.pkl'
-RUTA_FEATURES = 'src/models/features_tmin.pkl'
+RUTA_MODELO = 'src/models/modelo_tmin.joblib'
+RUTA_FEATURES = 'src/models/features_tmin.joblib'
 
 def train_temp_min_model():
     print("\n--- ENTRENANDO MODELO T_MIN (Con Métricas Completas) ---")

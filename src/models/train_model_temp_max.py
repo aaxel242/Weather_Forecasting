@@ -8,8 +8,8 @@ import os
 
 # --- CONFIGURACIÓN ---
 RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
-RUTA_MODELO = 'src/models/modelo_tmax.pkl'
-RUTA_FEATURES = 'src/models/features_tmax.pkl'
+RUTA_MODELO = 'src/models/modelo_tmax.joblib'
+RUTA_FEATURES = 'src/models/features_tmax.joblib'
 
 def train_tmax():
     print("--- ENTRENANDO MODELO T_MAX (Con Lags y Métricas Completas) ---")

@@ -8,8 +8,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # --- CONFIGURACIÓN ---
 RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
-RUTA_MODELO = 'src/models/modelo_lluvia.pkl'
-RUTA_FEATURES = 'src/models/features_lluvia.pkl'
+RUTA_MODELO = 'src/models/modelo_lluvia.joblib'
+RUTA_FEATURES = 'src/models/features_lluvia.joblib'
 
 def train_rain_model_optimized():
     print("\n--- ENTRENANDO MODELO LLUVIA (OPTIMIZADO: Delta Presión + Umbral) ---")

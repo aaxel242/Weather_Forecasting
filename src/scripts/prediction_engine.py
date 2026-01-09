@@ -13,7 +13,7 @@ from datetime import timedelta
 @st.cache_resource
 def cargar_modelos(base_path):
     """
-    Carga los modelos .pkl y las listas de features desde la carpeta 'models'.
+    Carga los modelos .joblib y las listas de features desde la carpeta 'models'.
     base_path: Ruta raíz del proyecto (donde está src/)
     """
     try:
@@ -21,14 +21,14 @@ def cargar_modelos(base_path):
         models_dir = os.path.join(base_path, 'models')
         
         # Cargar Modelos (Objetos entrenados)
-        m_tmax = joblib.load(os.path.join(models_dir, 'modelo_tmax.pkl'))
-        m_tmin = joblib.load(os.path.join(models_dir, 'modelo_tmin.pkl'))
-        m_lluvia = joblib.load(os.path.join(models_dir, 'modelo_lluvia.pkl')) 
+        m_tmax = joblib.load(os.path.join(models_dir, 'modelo_tmax.joblib'))
+        m_tmin = joblib.load(os.path.join(models_dir, 'modelo_tmin.joblib'))
+        m_lluvia = joblib.load(os.path.join(models_dir, 'modelo_lluvia.joblib')) 
         
         # Cargar Listas de Features (Columnas exactas usadas en el entrenamiento)
-        f_tmax = joblib.load(os.path.join(models_dir, 'features_tmax.pkl'))
-        f_tmin = joblib.load(os.path.join(models_dir, 'features_tmin.pkl'))
-        f_lluvia = joblib.load(os.path.join(models_dir, 'features_lluvia.pkl'))
+        f_tmax = joblib.load(os.path.join(models_dir, 'features_tmax.joblib'))
+        f_tmin = joblib.load(os.path.join(models_dir, 'features_tmin.joblib'))
+        f_lluvia = joblib.load(os.path.join(models_dir, 'features_lluvia.joblib'))
         
         return (m_tmax, f_tmax), (m_tmin, f_tmin), (m_lluvia, f_lluvia)
     except Exception as e:
