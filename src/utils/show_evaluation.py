@@ -9,9 +9,9 @@ def show_evaluation(data):
     st.header("Evaluación de Modelos Pre-entrenados")
     
     modelos_config = [
-        {"nombre": "Modelo de Lluvia", "ruta": "src/models/modelo_lluvia.pkl", "tipo": "clasificacion"},
-        {"nombre": "Temperatura Máxima", "ruta": "src/models/modelo_tmax.pkl", "tipo": "regresion"},
-        {"nombre": "Temperatura Mínima", "ruta": "src/models/modelo_tmin.pkl", "tipo": "regresion"}
+        {"nombre": "Modelo de Lluvia", "ruta": "src/models/modelo_lluvia.joblib", "tipo": "clasificacion"},
+        {"nombre": "Temperatura Máxima", "ruta": "src/models/modelo_tmax.joblib", "tipo": "regresion"},
+        {"nombre": "Temperatura Mínima", "ruta": "src/models/modelo_tmin.joblib", "tipo": "regresion"}
     ]
 
     for config in modelos_config:
