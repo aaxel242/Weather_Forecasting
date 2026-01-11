@@ -2,7 +2,7 @@ import streamlit as st
 
 def basic_stats (data):
     st.subheader("Dataset")
-    st.dataframe(data.head(100), use_container_width=True)
+    st.dataframe(data.head(100), width="stretch")
 
     st.divider()
 

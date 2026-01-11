@@ -60,7 +60,7 @@ def correlation_heatmap(data):
             # PASO 3: Forzamos a Streamlit a mostrar los decimales para confirmar que no hay ceros
             st.dataframe(
                 df_signif, 
-                use_container_width=True, 
+                width="stretch", 
                 hide_index=True
             )
         else:

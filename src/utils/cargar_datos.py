@@ -19,3 +19,4 @@ def cargar_datos():
         data = pd.DataFrame()  # vacío para poder concatenar si hay uploader
 
     return data
+    

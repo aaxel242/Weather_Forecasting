@@ -18,7 +18,7 @@ def train_tmax():
     try:
         df = pd.read_csv(RUTA_DATOS)
     except FileNotFoundError:
-        print(f"❌ Error: No se encuentra {RUTA_DATOS}")
+        print(f" Error: No se encuentra {RUTA_DATOS}")
         return
 
     df['date'] = pd.to_datetime(df['date'])
@@ -65,7 +65,7 @@ def train_tmax():
     rmse = np.sqrt(mse)
     r2 = r2_score(y_test, y_pred)
 
-    print("\n📊 RESULTADOS EVALUACIÓN T_MAX:")
+    print("\n RESULTADOS EVALUACIÓN T_MAX:")
     print(f"   - MAE  (Error Medio Absoluto): {mae:.4f} °C")
     print(f"   - MSE  (Error Cuadrático):     {mse:.4f}")
     print(f"   - RMSE (Raíz Error Cuad.):     {rmse:.4f} °C")
@@ -75,7 +75,7 @@ def train_tmax():
     os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
     joblib.dump(model, RUTA_MODELO)
     joblib.dump(features, RUTA_FEATURES) # Guardamos la lista de columnas
-    print(f"\n✅ Modelo guardado en: {RUTA_MODELO}")
+    print(f"\n Modelo guardado en: {RUTA_MODELO}")
 
 if __name__ == "__main__":
     train_tmax()

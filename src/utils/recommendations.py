@@ -49,3 +49,4 @@ def obtener_consejo_y_kit(t_min, t_max, lluvia_bin):
         return "Refresca un poco, lleva una capa extra.", "chaqueta.png"
     else:
         return "Tiempo agradable. Disfruta del día.", "sol.png" # Si no hace nada especial, sol
+    

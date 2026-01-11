@@ -40,7 +40,7 @@ def visualization_Data(data):
             
             # Verificamos si la imagen existe antes de mostrarla
             if os.path.exists(full_path):
-                st.image(full_path, use_container_width=True)
+                st.image(full_path, width="stretch")
                 # Información debajo de la imagen
                 st.caption(img_data['info'])
             else:

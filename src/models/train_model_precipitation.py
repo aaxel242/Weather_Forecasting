@@ -17,7 +17,7 @@ def train_rain_model_optimized():
     try:
         df = pd.read_csv(RUTA_DATOS)
     except FileNotFoundError:
-        print(f"❌ Error: No se encuentra {RUTA_DATOS}")
+        print(f" Error: No se encuentra {RUTA_DATOS}")
         return
 
     if 'date' in df.columns:
@@ -80,7 +80,7 @@ def train_rain_model_optimized():
     rec = recall_score(y_test, y_pred_ajustado, zero_division=0)
     f1 = f1_score(y_test, y_pred_ajustado, zero_division=0)
     
-    print(f"\n📊 RESULTADOS CON UMBRAL {UMBRAL_OPTIMO} (Más sensible):")
+    print(f"\n RESULTADOS CON UMBRAL {UMBRAL_OPTIMO} (Más sensible):")
     print(f"   - Recall (Sensibilidad): {rec:.4f} (¡Buscamos que esto suba!)")
     print(f"   - Precision:             {prec:.4f}")
     print(f"   - Accuracy:              {acc:.4f}")
@@ -101,7 +101,7 @@ def train_rain_model_optimized():
     os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
     joblib.dump(model, RUTA_MODELO)
     joblib.dump(features_cols, RUTA_FEATURES)
-    print(f"\n✅ Modelo guardado en: {RUTA_MODELO}")
+    print(f"\n Modelo guardado en: {RUTA_MODELO}")
 
 if __name__ == "__main__":
     train_rain_model_optimized()
