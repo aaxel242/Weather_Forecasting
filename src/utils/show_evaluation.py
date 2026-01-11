@@ -79,9 +79,10 @@ def show_evaluation(data):
                 y_true = y.iloc[split_idx:]
 
                 if config["tipo"] == "clasificacion":
-                    # Aplicamos el umbral de 0.26 para lluvia
-                    y_probs = modelo.predict_proba(X_test)[:, 1]
-                    y_pred = (y_probs >= 0.26).astype(int)
+                    # CAMBIO AQUÍ: Usamos predict() directo, ya no usamos el 0.26 manual
+                    # porque el modelo ya está balanceado con SMOTE.
+                    y_pred = modelo.predict(X_test) 
+                    
                     evaluate_precipitation(y_true, y_pred, config["nombre"])
                 else:
                     y_pred = modelo.predict(X_test)

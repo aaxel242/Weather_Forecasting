@@ -6,10 +6,10 @@ import os
 from src.utils.cargar_datos import cargar_datos
 from src.utils.limpieza import limpiar_datos
 from src.utils.imputar_datos import imputar_datos
-from utils.p_value import correlation_heatmap
-from utils.data_analysis import basic_stats
-from utils.visualize_data import visualization_Data
-from utils.show_evaluation import show_evaluation
+from src.utils.p_value import correlation_heatmap
+from src.utils.data_analysis import basic_stats
+from src.utils.visualize_data import visualization_Data
+from src.utils.show_evaluation import show_evaluation
 
 st.set_page_config(page_title="Weather Forecasting", layout="wide")
 
