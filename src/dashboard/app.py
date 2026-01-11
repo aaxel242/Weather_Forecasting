@@ -65,10 +65,12 @@ def main_frontend():
     
     st.markdown("---")
 
-    # 4. Sección EDA
-
-    with st.expander("Ver Análisis de Datos Históricos"):
-            render_eda_section()
+    
+    with st.expander("Que recomendaciones existen:"):
+        st.markdown("Aquí puedes ver todos los consejos que nuestra IA puede ofrecerte según el clima:")
+        # Importamos la nueva función desde cards
+        from src.dashboard.ui.cards import renderizar_galeria_consejos
+        renderizar_galeria_consejos(base_src)
     
     # Ubicaciones de las estaciones
 
@@ -79,11 +81,10 @@ def main_frontend():
             st.markdown("Puerto Olimpico")
             st.image("src/images/ubicacion_estación__puerto_olimpico_s.png")
 
-    with st.expander("Que recomendaciones existen:"):
-        st.markdown("Aquí puedes ver todos los consejos que nuestra IA puede ofrecerte según el clima:")
-        # Importamos la nueva función desde cards
-        from src.dashboard.ui.cards import renderizar_galeria_consejos
-        renderizar_galeria_consejos(base_src)
+    
+    # 4. Sección EDA
+    with st.expander("Ver Análisis de Datos Históricos"):
+         render_eda_section()
 
 
 if __name__ == "__main__":
