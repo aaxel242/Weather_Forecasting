@@ -5,9 +5,12 @@ setlocal
 :: 1. Entramos en la carpeta del proyecto
 cd /d "%~dp0"
 
-:: 2. Forzamos a Streamlit a ejecutarse desde la carpeta raiz
-:: Usamos comillas dobles para que el espacio en "Proyecto 3" no rompa el comando
+echo Verificando dependencias...
+:: 2. Sincroniza el entorno (Instala lo que falte segun el pyproject.toml)
+call uv sync
 
+echo Iniciando aplicacion...
+:: 3. Ejecutamos la app
 call uv run python -m streamlit run src/main.py
 
 pause
