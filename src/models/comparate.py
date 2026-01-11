@@ -1,270 +1,233 @@
-import joblib
 import pandas as pd
-import os
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 
-from src.utils.cargar_datos import cargar_datos
 from src.utils.limpieza import limpiar_datos
 from src.utils.imputar_datos import imputar_datos
-
-# Cargar y preparar datos
-data = cargar_datos() 
-data_clean = limpiar_datos(data)        
-data_imput = imputar_datos(data_clean)  
-
-target_column_prep = "bin_prep" 
-
-leaky = [target_column_prep, "date"]
-features = data_imput.drop(columns=[c for c in leaky if c in data_imput.columns], errors='ignore')
-labels = data_imput[target_column_prep].astype(int)
-
-# Crear directorio de modelos
-model_dir = "src/models"
-os.makedirs(model_dir, exist_ok=True)
-
-model_path_rf = f"{model_dir}/model_lluvia_rf.pkl"
-model_path_lr = f"{model_dir}/model_lluvia_lr.pkl"
-
-# Split de datos
-split_factor = 0.8
-split = int(len(features) * split_factor)
-X_train, X_test = features.iloc[:split], features.iloc[split:]
-y_train, y_test = labels.iloc[:split], labels.iloc[split:]
-
-# ============================================
-# MODELO 1: Random Forest
-# ============================================
-print("Entrenando Random Forest...")
-model_rf = Pipeline([
-    ('classifier', RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=42))
-])
-
-model_rf.fit(X_train, y_train)
-joblib.dump(model_rf, model_path_rf)
-
-predictions_rf = model_rf.predict(X_test)
-
-accuracy_rf = accuracy_score(y_test, predictions_rf)
-precision_rf = precision_score(y_test, predictions_rf, average='weighted', zero_division=0)
-recall_rf = recall_score(y_test, predictions_rf, average='weighted', zero_division=0)
-f1_rf = f1_score(y_test, predictions_rf, average='weighted', zero_division=0)
-
-mae_rf = mean_absolute_error(y_test, predictions_rf)
-mse_rf = mean_squared_error(y_test, predictions_rf)
-rmse_rf = np.sqrt(mean_squared_error(y_test, predictions_rf))
-r2_rf = r2_score(y_test, predictions_rf)
-
-print(f"\n--- Evaluación Modelo Random Forest ---")
-print(f"Accuracy: {accuracy_rf:.4f}")
-print(f"Precision: {precision_rf:.4f}")
-print(f"Recall: {recall_rf:.4f}")
-print(f"F1-Score: {f1_rf:.4f}")
-print(f"\n{classification_report(y_test, predictions_rf)}")
-
-# ============================================
-# MODELO 2: Logistic Regression
-# ============================================
-print("\n\nEntrenando Logistic Regression...")
-model_lr = Pipeline([
-    ('classifier', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))
-])
-
-model_lr.fit(X_train, y_train)
-joblib.dump(model_lr, model_path_lr)
-
-predictions_lr = model_lr.predict(X_test)
-
-accuracy_lr = accuracy_score(y_test, predictions_lr)
-precision_lr = precision_score(y_test, predictions_lr, average='weighted', zero_division=0)
-recall_lr = recall_score(y_test, predictions_lr, average='weighted', zero_division=0)
-f1_lr = f1_score(y_test, predictions_lr, average='weighted', zero_division=0)
-
-mae_lr = mean_absolute_error(y_test, predictions_lr)
-mse_lr = mean_squared_error(y_test, predictions_lr)
-rmse_lr = np.sqrt(mean_squared_error(y_test, predictions_lr))
-r2_lr = r2_score(y_test, predictions_lr)
-
-print(f"\n--- Evaluación Modelo Logistic Regression ---")
-print(f"Accuracy: {accuracy_lr:.4f}")
-print(f"Precision: {precision_lr:.4f}")
-print(f"Recall: {recall_lr:.4f}")
-print(f"F1-Score: {f1_lr:.4f}")
-print(f"\n{classification_report(y_test, predictions_lr)}")
-
-# ============================================
-# COMPARATIVA
-# ============================================
-print("\n\n--- COMPARATIVA DE MODELOS ---")
-print(f"Random Forest F1-Score: {f1_rf:.4f}")
-print(f"Logistic Regression F1-Score: {f1_lr:.4f}")
-
-print("\n\n--- COMPARATIVA DE MODELOS ---")
-print(f"Random Forest MAE: {mae_rf:.4f}")
-print(f"Logistic Regression MAE: {mae_lr:.4f}")
-
-print("\n\n--- COMPARATIVA DE MODELOS ---")
-print(f"Random Forest RMSE: {rmse_rf:.4f}")
-print(f"Logistic Regression RMSE: {rmse_lr:.4f}")
-
-print(f"\nModelos guardados en: {model_dir}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-import joblib
-import pandas as pd
-import numpy as np
-import os
-
-from sklearn.model_selection import GridSearchCV
-from collections import Counter
 from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import (confusion_matrix, accuracy_score, 
+                             precision_score, recall_score, f1_score)
 
-# --- CONFIGURACIÓN ---
-RUTA_DATOS = 'src/data/processed/data_weather_final.csv'
-RUTA_MODELO = 'src/models/modelo_lluvia.pkl'
-RUTA_FEATURES = 'src/models/features_lluvia.pkl'
-RUTA_SCALER = 'src/models/scaler_lluvia.pkl'
-RUTA_UMBRAL = 'src/models/umbral_lluvia.pkl' # ← Guardaremos el umbral óptimo
+df = pd.read_csv('src/data/processed/data_weather_final.csv')
+if 'date' in df.columns:
+    # convierte la columna date en datetime y ordena cornologicamente
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.sort_values('date')
 
-def train_rain_model_optimized():
-    print("\n--- ENTRENANDO MODELO LLUVIA (SVM OPTIMIZADO) ---")
-    
-    try:
-        df = pd.read_csv(RUTA_DATOS)
-    except FileNotFoundError:
-        print(f"❌ Error: No se encuentra {RUTA_DATOS}")
-        return
+# A. Lags Clásicos
+df['rain_yesterday_bin'] = (df['precipitacion_lag1'] > 0.1).astype(int)
 
-    if 'date' in df.columns:
-        df['date'] = pd.to_datetime(df['date'])
-        df = df.sort_values('date')
+# B. NUEVO: Tendencia de Presión (Pressure Delta)
+# La caída de presión es el mejor predictor físico de tormentas
+df['pressure_yesterday'] = df['surface_pressure_hpa_mean'].shift(1)
+df['pressure_delta'] = df['surface_pressure_hpa_mean'] - df['pressure_yesterday'] 
+# (Si es negativo significa que la presión está cayendo)
 
-    # 1. INGENIERÍA DE CARACTERÍSTICAS
-    df['rain_yesterday_bin'] = (df['precipitacion_lag1'] > 0.1).astype(int)
-    
-    # Presión
-    df['pressure_yesterday'] = df['surface_pressure_hpa_mean'].shift(1)
-    df['pressure_delta'] = df['surface_pressure_hpa_mean'] - df['pressure_yesterday']
-    
-    # --- MEJORA: CARACTERÍSTICAS CÍCLICAS (Seno/Coseno) ---
-    # Esto ayuda al modelo a entender que diciembre y enero están juntos
-    df['dia_sin'] = np.sin(2 * np.pi * df['dia_del_anio'] / 365.0)
-    df['dia_cos'] = np.cos(2 * np.pi * df['dia_del_anio'] / 365.0)
-    df['mes_sin'] = np.sin(2 * np.pi * df['mes'] / 12.0)
-    df['mes_cos'] = np.cos(2 * np.pi * df['mes'] / 12.0)
-    
-    df = df.dropna()
+# LIMPIEZA CONTROLADA DE FEATURES TEMPORALES
+df = df.dropna(subset=['pressure_delta'])
 
-    features_cols = [
-        'precipitacion_lag1', 'rain_yesterday_bin',
-        'pressure_delta', 
-        'surface_pressure_hpa_mean', 
-        'cloudcover__mean', 'cloudcover__max',
-        'hrmedia', 'hrmax',
-        'dewpoint_2m_c_mean',
-        # Usamos las cíclicas en lugar de 'mes' y 'dia' puros
-        'dia_sin', 'dia_cos', 'mes_sin', 'mes_cos'
-    ]
+FEATURES = [
+    'precipitacion_lag1', 
+    'rain_yesterday_bin',  # Indicador binario de lluvia el día anterior.
+    'pressure_delta',  # Cambio de presión respecto al día anterior.
+    'surface_pressure_hpa_mean', 
+    'cloudcover__mean',
+    'cloudcover__max',
+    'hrmedia', # Humedad relativa media diaria.
+    'hrmax', # Máxima humedad del día
+    'dewpoint_2m_c_mean',  # Punto de rocío medio a 2 metros.
+    'mes', 
+    'dia_del_anio', 
+    'estacion_invierno', 
+    'estacion_verano', 
+    'estacion_otoo',
+    'estacion_primavera'
+]
 
-    X = df[features_cols]
-    y = df['bin_prep']
+def imprimir_metricas(y_test, y_pred, nombre_modelo):
+    acc = accuracy_score(y_test, y_pred)
+    prec = precision_score(y_test, y_pred, zero_division=0)
+    rec = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+    cm = confusion_matrix(y_test, y_pred)
 
-    print(f"Features usadas: {features_cols}")
-
-    # 2. SPLIT
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
-
-    # 3. NORMALIZACIÓN
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    # 4. SMOTE (Sobremuestreo)
-    # Sampling strategy 0.7 significa: queremos que la lluvia sea el 70% de los días de sol (no 1 a 1 para no forzar tanto)
-    smote = SMOTE(sampling_strategy=0.8, random_state=42) 
-    X_train_smote, y_train_smote = smote.fit_resample(X_train_scaled, y_train)
-    print(f"Distribución tras SMOTE: {Counter(y_train_smote)}")
-
-    # 5. ENTRENAMIENTO SVM
-    print("\n🔍 Iniciando Entrenamiento SVM...")
-    
-    # Hemos quitado class_weight='balanced' para reducir Falsos Positivos
-    # Hemos bajado C a 10 para reducir overfitting (tu anterior C=100 era muy agresivo)
-    model = SVC(
-        C=10, 
-        kernel='rbf', 
-        gamma='scale',
-        probability=True, # Necesario para curvas de precisión
-        random_state=42
-    )
-    
-    model.fit(X_train_smote, y_train_smote)
-
-    # 6. BÚSQUEDA DEL UMBRAL ÓPTIMO (Threshold Tuning)
-    # En lugar de adivinar, probamos todos los cortes posibles
-    print("\n⚖️ Buscando el mejor umbral de decisión...")
-    
-    y_probs = model.predict_proba(X_test_scaled)[:, 1] # Probabilidad de lluvia
-    
-    thresholds = np.arange(0.1, 0.9, 0.05)
-    best_f1 = 0
-    best_thresh = 0.5
-    
-    for thresh in thresholds:
-        y_pred_temp = (y_probs >= thresh).astype(int)
-        f1 = f1_score(y_test, y_pred_temp)
-        if f1 > best_f1:
-            best_f1 = f1
-            best_thresh = thresh
-
-    # Aplicamos el mejor umbral encontrado
-    y_final_pred = (y_probs >= best_thresh).astype(int)
-
-    # 7. RESULTADOS
-    acc = accuracy_score(y_test, y_final_pred)
-    prec = precision_score(y_test, y_final_pred, zero_division=0)
-    rec = recall_score(y_test, y_final_pred, zero_division=0)
-    
-    print(f"\n🏆 MEJOR UMBRAL ENCONTRADO: {best_thresh:.2f}")
-    print(f"📊 RESULTADOS FINALES:")
-    print(f"   - Recall (Sensibilidad): {rec:.4f}")
-    print(f"   - Precision:             {prec:.4f}")
-    print(f"   - Accuracy:              {acc:.4f}")
-    print(f"   - F1-Score:              {best_f1:.4f}")
-
-    cm = confusion_matrix(y_test, y_final_pred)
+    print(f"\n📊 RESULTADOS {nombre_modelo}:")
+    print(f"   - Recall:    {rec:.4f}")
+    print(f"   - Precision: {prec:.4f}")
+    print(f"   - Accuracy:  {acc:.4f}")
+    print(f"   - F1-Score:  {f1:.4f}")
     print(f"\n   Matriz de Confusión:")
-    print(f"   TN (Sol ok): {cm[0][0]} | FP (Falsa alarma): {cm[0][1]}")
-    print(f"   FN (Lluvia perdida): {cm[1][0]} | TP (Lluvia detectada): {cm[1][1]}")
+    print(f"   TN: {cm[0][0]} | FP: {cm[0][1]}")
+    print(f"   FN: {cm[1][0]} | TP: {cm[1][1]}")
 
-    # GUARDADO
-    os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
-    joblib.dump(model, RUTA_MODELO)
-    joblib.dump(scaler, RUTA_SCALER)
-    joblib.dump(features_cols, RUTA_FEATURES)
-    joblib.dump(best_thresh, RUTA_UMBRAL) # Guardamos el umbral para usarlo en prediction_engine
+def logistic_cv_smote_grind(df):
+    print("\n--- Entrenando Logistic Regression con GridSearch + SMOTE ---")
+
+    df_model = df[FEATURES + ['bin_prep']].copy()
+
+    if df_model.isna().any().any():
+        raise ValueError("❌ Hay NaNs después de la imputación (Logistic).")
+
+    X = df_model[FEATURES]
+    y = df_model['bin_prep']
+
+    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+
+    pipeline_lr = Pipeline([
+        ('scaler', StandardScaler()),
+        ('smote', SMOTE(random_state=42)),
+        ('lr', LogisticRegression(
+            max_iter=1000,
+            random_state=42
+        ))
+    ])
+
+    param_grid_lr = {
+        'lr__C': [0.01, 0.1, 1, 10],
+        'lr__solver': ['lbfgs']
+    }
+
+    grid_lr = GridSearchCV(
+        pipeline_lr,
+        param_grid_lr,
+        cv=5,
+        scoring='f1',
+        n_jobs=-1
+    )
+
+    grid_lr.fit(X_train, y_train)
+
+    best_model = grid_lr.best_estimator_
+
+    # y_prob = best_model.predict_proba(X_test)[:, 1]
+    # y_pred = (y_prob >= 0.35).astype(int)
+
+    y_pred = best_model.predict(X_test)
+
+    imprimir_metricas(y_test, y_pred, "LOGISTIC REGRESSION")
+
+    return best_model
+
+def randomforest_cv_smote_grind(df):
+    print("\n--- Entrenando RandomForest con GridSearch ---")
+
+    df_model = df[FEATURES + ['bin_prep']].copy()
+
+    if df_model.isna().any().any():
+        raise ValueError("❌ Hay NaNs después de la imputación (RF).")
+
+    X = df_model[FEATURES]
+    y = df_model['bin_prep']
     
-    print(f"\n✅ Modelo y componentes guardados.")
+    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+
+    pipeline_rf = Pipeline([
+        ('smote', SMOTE(random_state=42)),
+        ('rf', RandomForestClassifier(
+            random_state=42,
+            # class_weight='balanced',
+            # n_estimators=500,
+            # max_depth=8,
+            # min_samples_leaf=10,
+            # min_samples_split=5
+        ))
+    ])
+
+    # pipeline_rf.fit(X_train, y_train)
+
+    # # y_prob = pipeline_rf.predict_proba(X_test)[:, 1]
+    # # y_pred = (y_prob >= 0.35).astype(int)
+
+    # y_pred = pipeline_rf.predict(X_test)
+
+    # Dejamos que GridSearch busque el equilibrio usando F1
+    param_grid = {
+        'rf__n_estimators': [500],
+        'rf__max_depth': [8],
+        'rf__min_samples_leaf': [10]
+    }
+
+    grid_rf = GridSearchCV(pipeline_rf, param_grid, cv=5, scoring='f1', n_jobs=-1)
+    grid_rf.fit(X_train, y_train)
+
+    y_pred = grid_rf.best_estimator_.predict(X_test)
+
+    imprimir_metricas(y_test, y_pred, "RANDOM FOREST")
+
+    return pipeline_rf
+
+def smv_cv_smote_grind(df):
+    print("\n--- Entrenando SVM con GridSearch + SMOTE ---")
+
+    df_model = df[FEATURES + ['bin_prep']].copy()
+
+    if df_model.isna().any().any():
+        raise ValueError("❌ Hay NaNs después de la imputación (SVM).")
+
+    X = df_model[FEATURES]
+    y = df_model['bin_prep']
+
+    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+
+    pipeline_svm = Pipeline([
+        ('scaler', StandardScaler()),
+        ('smote', SMOTE(random_state=42)),
+        ('svc', SVC(
+            probability=True,
+            random_state=42,
+        ))
+    ])
+
+    param_grid_svm = {
+        'svc__C': [0.1, 1, 10],
+        'svc__kernel': ['rbf'],
+        'svc__gamma': ['scale']
+    }
+
+    grid_svm = GridSearchCV(
+        pipeline_svm,
+        param_grid_svm,
+        cv=5,
+        scoring='f1',
+        n_jobs=-1
+    )
+
+    grid_svm.fit(X_train, y_train)
+
+    best_model = grid_svm.best_estimator_
+
+    # y_prob = best_model.predict_proba(X_test)[:, 1]
+    # y_pred = (y_prob >= 0.35).astype(int)
+
+    y_pred = best_model.predict(X_test)
+
+    imprimir_metricas(y_test, y_pred, "SVM")
+
+    return best_model
+
+def temporal_train_test_split(X, y, test_size=0.2):
+    split_idx = int(len(X) * (1 - test_size))
+
+    X_train = X.iloc[:split_idx]
+    X_test  = X.iloc[split_idx:]
+    y_train = y.iloc[:split_idx]
+    y_test  = y.iloc[split_idx:]
+
+    return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
-    train_rain_model_optimized()
+    try:
+        # Ejecutar ambos modelos
+        df = limpiar_datos(df)
+        df = imputar_datos(df)
+        best_rf = randomforest_cv_smote_grind(df)
+        best_svm = smv_cv_smote_grind(df)
+        best_lr  = logistic_cv_smote_grind(df)
+        print("\n✅ Proceso completado con éxito.")
+        
+    except FileNotFoundError:
+        print("❌ Error: No se encontró el archivo CSV.")
