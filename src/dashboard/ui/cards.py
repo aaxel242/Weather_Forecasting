@@ -271,3 +271,79 @@ def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
     
     # Renderizamos el componente con una altura segura para que no corte la sombra
     components.html(full_html, height=270, scrolling=False)
+
+def obtener_todos_los_consejos(base_path):
+    """Retorna una lista de diccionarios con todos los consejos posibles y sus imágenes en base64."""
+    images_dir = os.path.join(base_path, 'images')
+    
+    # Definimos los casos basados en tu lógica de obtener_consejo
+    casos = [
+        # (tmin, tmax, lluvia, titulo_caso)
+        (5, 5, 1, "Lluvia y Frío"),
+        (12, 12, 1, "Lluvia y Fresco"),
+        (20, 30, 1, "Lluvia y Calor"),
+        (20, 20, 1, "Solo Lluvia"),
+        (5, 5, 0, "Día Frío"),
+        (12, 12, 0, "Día Fresco"),
+        (20, 30, 0, "Día Caluroso"),
+        (22, 22, 0, "Día Gradable")
+    ]
+    
+    lista_consejos = []
+    vistos = set() # Para no repetir consejos si coinciden los textos
+
+    for tmin, tmax, lluvia, titulo in casos:
+        texto, icono_nombre = obtener_consejo(tmin, tmax, lluvia)
+        if texto not in vistos:
+            b64_img = img_to_base64(os.path.join(images_dir, icono_nombre))
+            lista_consejos.append({
+                "texto": texto,
+                "imagen": b64_img
+            })
+            vistos.add(texto)
+            
+    return lista_consejos
+
+
+def renderizar_galeria_consejos(base_path):
+    consejos = obtener_todos_los_consejos(base_path)
+    
+    html_cards = ""
+    for c in consejos:
+        html_cards += f"""
+        <div style="
+            background: linear-gradient(160deg, #1e293b, #0f172a);
+            border: 1px solid #60a5fa;
+            border-radius: 12px;
+            min-width: 150px;
+            height: 180px;
+            background-image: url('{c['imagen']}');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="
+                position: absolute; 
+                top:0; left:0; right:0; bottom:0;
+                background: rgba(0,0,0,0.4); /* Un poco más claro para ver mejor la imagen */
+                display: flex; 
+                flex-direction: column;
+                justify-content: flex-end; /* <--- ESTO MUEVE EL TEXTO ABAJO */
+                align-items: center;      /* Mantiene el texto centrado horizontalmente */
+                padding: 20px;            /* Espacio de seguridad para que no toque los bordes */
+                text-align: center;
+            ">
+                <p style="color: white; font-family: 'Roboto', sans-serif; font-weight: 800; font-size: 13px; text-shadow: 2px 2px 4px #000; margin: 0;">
+                    {c['texto']}
+                </p>
+            </div>
+        </div>
+        """
+
+    full_html = f"""
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 10px;">
+        {html_cards}
+    </div>
+    """
+    components.html(full_html, height=400, scrolling=True)

@@ -79,6 +79,12 @@ def main_frontend():
             st.markdown("Puerto Olimpico")
             st.image("src/images/ubicacion_estación__puerto_olimpico_s.png")
 
+    with st.expander("Que recomendaciones existen:"):
+        st.markdown("Aquí puedes ver todos los consejos que nuestra IA puede ofrecerte según el clima:")
+        # Importamos la nueva función desde cards
+        from src.dashboard.ui.cards import renderizar_galeria_consejos
+        renderizar_galeria_consejos(base_src)
+
 
 if __name__ == "__main__":
         main_frontend()
