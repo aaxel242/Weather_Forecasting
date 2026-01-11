@@ -13,6 +13,10 @@ from sklearn.metrics import (confusion_matrix, accuracy_score,
                              precision_score, recall_score, f1_score)
 
 df = pd.read_csv('src/data/processed/data_weather_final.csv')
+
+df = limpiar_datos(df)
+df = imputar_datos(df)
+
 if 'date' in df.columns:
     # convierte la columna date en datetime y ordena cornologicamente
     df['date'] = pd.to_datetime(df['date'])
@@ -75,7 +79,8 @@ def logistic_cv_smote_grind(df):
     X = df_model[FEATURES]
     y = df_model['bin_prep']
 
-    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    # X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
 
     pipeline_lr = Pipeline([
         ('scaler', StandardScaler()),
@@ -103,9 +108,6 @@ def logistic_cv_smote_grind(df):
 
     best_model = grid_lr.best_estimator_
 
-    # y_prob = best_model.predict_proba(X_test)[:, 1]
-    # y_pred = (y_prob >= 0.35).astype(int)
-
     y_pred = best_model.predict(X_test)
 
     imprimir_metricas(y_test, y_pred, "LOGISTIC REGRESSION")
@@ -123,7 +125,8 @@ def randomforest_cv_smote_grind(df):
     X = df_model[FEATURES]
     y = df_model['bin_prep']
     
-    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    # X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
 
     pipeline_rf = Pipeline([
         ('smote', SMOTE(random_state=42)),
@@ -136,13 +139,6 @@ def randomforest_cv_smote_grind(df):
             # min_samples_split=5
         ))
     ])
-
-    # pipeline_rf.fit(X_train, y_train)
-
-    # # y_prob = pipeline_rf.predict_proba(X_test)[:, 1]
-    # # y_pred = (y_prob >= 0.35).astype(int)
-
-    # y_pred = pipeline_rf.predict(X_test)
 
     # Dejamos que GridSearch busque el equilibrio usando F1
     param_grid = {
@@ -171,7 +167,8 @@ def smv_cv_smote_grind(df):
     X = df_model[FEATURES]
     y = df_model['bin_prep']
 
-    X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    # X_train, X_test, y_train, y_test = temporal_train_test_split(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False, random_state=42)
 
     pipeline_svm = Pipeline([
         ('scaler', StandardScaler()),
@@ -200,9 +197,6 @@ def smv_cv_smote_grind(df):
 
     best_model = grid_svm.best_estimator_
 
-    # y_prob = best_model.predict_proba(X_test)[:, 1]
-    # y_pred = (y_prob >= 0.35).astype(int)
-
     y_pred = best_model.predict(X_test)
 
     imprimir_metricas(y_test, y_pred, "SVM")
@@ -222,8 +216,6 @@ def temporal_train_test_split(X, y, test_size=0.2):
 if __name__ == "__main__":
     try:
         # Ejecutar ambos modelos
-        df = limpiar_datos(df)
-        df = imputar_datos(df)
         best_rf = randomforest_cv_smote_grind(df)
         best_svm = smv_cv_smote_grind(df)
         best_lr  = logistic_cv_smote_grind(df)
