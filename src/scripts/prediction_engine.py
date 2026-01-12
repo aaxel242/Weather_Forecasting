@@ -12,8 +12,11 @@ from datetime import timedelta
 
 @st.cache_resource
 def cargar_modelos(base_path):
-    # Carga modelos entrenados (.joblib) y listas de features desde carpeta 'models'.
-    # Parámetro: base_path (ruta raíz del proyecto). Retorna tuplas (modelo, features) para tmax, tmin, lluvia.
+    """
+    Carga modelos entrenados (.joblib) y listas de features desde carpeta 'models'.
+    Parámetros: base_path (str ruta raíz del proyecto).
+    Retorna: tuplas (modelo, features) para tmax, tmin, lluvia.
+    """
     try:
         # CORRECCIÓN DE RUTA: Apuntamos directamente a 'models' dentro del base_path
         models_dir = os.path.join(base_path, 'models')
@@ -34,8 +37,11 @@ def cargar_modelos(base_path):
         return None, None, None
 
 def preparar_datos_prediccion(base_path):
-    # Carga CSV histórico completo para obtener el punto de partida de predicciones.
-    # Parámetro: base_path (ruta raíz). Retorna DataFrame ordenado cronológicamente.
+    """
+    Carga CSV histórico completo para obtener el punto de partida de predicciones.
+    Parámetros: base_path (str ruta raíz).
+    Retorna: DataFrame ordenado cronológicamente.
+    """
     try:
         # CORRECCIÓN DE RUTA: Ajustamos para llegar a data/processed/
         csv_path = os.path.join(base_path, 'data', 'processed', 'data_weather_final.csv')
@@ -55,8 +61,11 @@ def preparar_datos_prediccion(base_path):
         return None
 
 def ejecutar_predicciones(df_historico, pack_tmax, pack_tmin, pack_lluvia):
-    # Genera predicciones recursivas para 7 días usando lógica de lags (valores predichos se convierten en inputs).
-    # Parámetros: df_historico (datos base), packs de modelos (modelo, features). Retorna listas de tmax, tmin, lluvia.
+    """
+    Genera predicciones recursivas para 7 días usando lógica de lags.
+    Parámetros: df_historico (DataFrame base), packs de modelos (modelo, features).
+    Retorna: listas (tmax, tmin, lluvia) para próximos 7 días.
+    """
     # Desempaquetar tuplas (Modelo, Lista de Features)
     m_tmax, feats_tmax = pack_tmax
     m_tmin, feats_tmin = pack_tmin

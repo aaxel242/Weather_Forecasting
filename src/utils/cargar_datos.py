@@ -3,8 +3,10 @@ import pandas as pd
 import streamlit as st
 
 def cargar_datos():
-    # Carga datos de CSV definitivo (data_weather_final.csv) desde carpeta processed.
-    # Permite concatenar datos adicionales si el usuario sube archivos. Retorna DataFrame.
+    """
+    Carga datos de CSV definitivo (data_weather_final.csv) desde carpeta processed.
+    Parámetros: ninguno. Retorna: DataFrame con datos históricos.
+    """
     data = None
 
     # CSV definitivo (base)

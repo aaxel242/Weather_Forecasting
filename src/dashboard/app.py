@@ -19,8 +19,11 @@ st.set_page_config(
 #     sys.path.append(current_dir)
 
 def main_frontend():
-    # Función principal que orquesta la interfaz de usuario del dashboard de predicción meteorológica.
-    # Carga modelos, realiza predicciones y renderiza tarjetas interactivas con recomendaciones diarias.
+    """
+    Función principal que orquesta la interfaz de usuario del dashboard.
+    Carga modelos, realiza predicciones y renderiza tarjetas interactivas con recomendaciones.
+    Parámetros: ninguno. Retorna: None (renderiza en Streamlit).
+    """
     
     # 1. Aplicar estilos globales (Fondo, scrollbars)
     apply_custom_styles()

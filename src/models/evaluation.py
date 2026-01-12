@@ -3,8 +3,10 @@ import numpy as np
 import streamlit as st
 
 def evaluate_precipitation(y_true, y_pred, nombre):
-    # Muestra métricas de clasificación para predicción de lluvia (Accuracy, Precisión, Recall, F1).
-    # Parámetros: y_true (valores reales), y_pred (predicciones), nombre (etiqueta del modelo).
+    """
+    Muestra métricas de clasificación para predicción de lluvia.
+    Parámetros: y_true (array reales), y_pred (array predicciones), nombre (str modelo).
+    """
     st.markdown(f"#### {nombre}")
     
     acc = accuracy_score(y_true, y_pred)
@@ -20,8 +22,10 @@ def evaluate_precipitation(y_true, y_pred, nombre):
     m4.metric("F1-Score", f"{f1:.2f}")
 
 def evaluate_temperature(y_true, y_pred, nombre):
-    # Muestra métricas de regresión para predicción de temperatura (MAE, MSE, RMSE, R²).
-    # Parámetros: y_true (valores reales), y_pred (predicciones), nombre (etiqueta del modelo).
+    """
+    Muestra métricas de regresión para predicción de temperatura.
+    Parámetros: y_true (array reales), y_pred (array predicciones), nombre (str modelo).
+    """
     st.markdown(f"#### {nombre}")
     
     mae = mean_absolute_error(y_true, y_pred)

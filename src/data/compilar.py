@@ -6,6 +6,8 @@ from data.unir_json import unir_json_a_csv
 def compilar_datos():
     """
     Compila todos los ficheros JSON de la carpeta en un único CSV.
+    Lee desde carpeta JSON base, unifica datos y guarda CSV procesado.
+    Parámetros: ninguno. Retorna: DataFrame unificado o None si hay error.
     """
     carpeta_json = "src/datos/json"
     salida_csv = "src/datos/csv/datos_clima_definitivo.csv"

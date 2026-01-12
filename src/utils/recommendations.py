@@ -1,8 +1,11 @@
 import os
 
 def obtener_icono_tiempo(lluvia_bin, t_min, t_max, nubes_mean):
-    # Retorna nombre de imagen de icono del clima según lluvia, temperatura y nubosidad.
-    # Parámetros: lluvia_bin (0/1), t_min, t_max, nubes_mean. Retorna: nombre de archivo PNG.
+    """
+    Retorna nombre de imagen de icono del clima según lluvia, temperatura y nubosidad.
+    Parámetros: lluvia_bin (int 0/1), t_min (float), t_max (float), nubes_mean (float).
+    Retorna: str nombre archivo PNG.
+    """
     t_promedio = (t_min + t_max) / 2
 
     # 1. Lluvia y Nieve
@@ -25,8 +28,11 @@ def obtener_icono_tiempo(lluvia_bin, t_min, t_max, nubes_mean):
 
 
 def obtener_consejo_y_kit(t_min, t_max, lluvia_bin):
-    # Genera recomendación de qué llevar según lluvia y temperatura predichas.
-    # Parámetros: t_min, t_max, lluvia_bin (0/1). Retorna: tupla (consejo_texto, icono_archivo).
+    """
+    Genera recomendación de qué llevar según lluvia y temperatura predichas.
+    Parámetros: t_min (float), t_max (float), lluvia_bin (int 0/1).
+    Retorna: tupla (str consejo, str nombre_icono).
+    """
     t_promedio = (t_min + t_max) / 2
     
     # Prioridad 1: Lluvia

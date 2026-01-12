@@ -17,8 +17,10 @@ RUTA_MODELO = 'src/models/modelo_lluvia.joblib'
 RUTA_FEATURES = 'src/models/features_lluvia.joblib'
 
 def imprimir_metricas(y_test, y_pred, nombre_modelo):
-    # Calcula e imprime métricas de clasificación: Recall, Precisión, Accuracy, F1 y Matriz de Confusión.
-    # Parámetros: y_test (valores reales), y_pred (predicciones), nombre_modelo (etiqueta para mostrar).
+    """
+    Calcula e imprime métricas de clasificación: Recall, Precisión, Accuracy, F1.
+    Parámetros: y_test (array reales), y_pred (array predicciones), nombre_modelo (str).
+    """
     acc = accuracy_score(y_test, y_pred)
     prec = precision_score(y_test, y_pred, zero_division=0)
     rec = recall_score(y_test, y_pred, zero_division=0)
@@ -35,9 +37,10 @@ def imprimir_metricas(y_test, y_pred, nombre_modelo):
     print(f"   FN: {cm[1][0]} | TP: {cm[1][1]}")
 
 def train_rain_model_optimized():
-    # Entrena un modelo RandomForest con SMOTE para clasificar días lluviosos vs secos.
-    # Utiliza características como delta de presión (indicador de tormentas) y humedad.
-    # Retorna modelo entrenado y lo guarda en disco.
+    """
+    Entrena RandomForest con SMOTE para clasificar días lluviosos vs secos.
+    Parámetros: ninguno. Retorna: None (guarda modelo en disco).
+    """
     print("\n--- ENTRENANDO MODELO LLUVIA (OPTIMIZADO: Delta Presión + Umbral) ---")
     
     try:

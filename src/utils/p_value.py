@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 def correlation_heatmap(data):
-    # Muestra matriz de correlaciones (heatmap) y tabla de correlaciones significativas (p ≤ 0.05).
-    # Parámetro: data (DataFrame). Renderiza visualizaciones interactivas de relaciones entre variables.
+    """
+    Muestra matriz de correlaciones (heatmap) y tabla de correlaciones significativas.
+    Parámetros: data (DataFrame). Retorna: None (renderiza gráficos en Streamlit).
+    """
     data_numeric = data.select_dtypes(include=[np.number]).dropna()
     
     if len(data_numeric) < 2:
@@ -68,8 +70,11 @@ def correlation_heatmap(data):
             st.info("No se encontraron correlaciones con p-value visible (mayores a 0.0000).")
 
 def correlation_pvalue_matrix(df: pd.DataFrame, method: str = "pearson") -> pd.DataFrame:
-    # Calcula matriz de p-values para correlaciones por pares (Pearson, Spearman, Kendall).
-    # Parámetros: df (DataFrame numérico), method (tipo de correlación). Retorna matriz de p-values.
+    """
+    Calcula matriz de p-values para correlaciones por pares (Pearson, Spearman, Kendall).
+    Parámetros: df (DataFrame numérico), method (str tipo correlación).
+    Retorna: DataFrame matriz de p-values.
+    """
     df = df.loc[:, df.std() > 0]
     cols = df.columns
     pvals = pd.DataFrame(index=cols, columns=cols, dtype=float)

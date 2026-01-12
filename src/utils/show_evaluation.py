@@ -6,8 +6,10 @@ import numpy as np
 from src.models.evaluation import evaluate_precipitation, evaluate_temperature
 
 def show_evaluation(data):
-    # Carga modelos pre-entrenados y evalúa su desempeño en datos de prueba.
-    # Parámetro: data (DataFrame). Muestra métricas de lluvia, temp.máxima y temp.mínima en pestañas expandibles.
+    """
+    Carga modelos pre-entrenados y evalúa su desempeño en datos de prueba.
+    Parámetros: data (DataFrame). Retorna: None (muestra métricas en Streamlit).
+    """
     
     modelos_config = [
         {"nombre": "Modelo de Lluvia", "ruta": "src/models/modelo_lluvia.joblib", "tipo": "clasificacion"},

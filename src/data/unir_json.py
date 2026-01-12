@@ -4,6 +4,8 @@ import pandas as pd
 def unir_json_a_csv(carpeta_raiz, salida_csv):
     """
     Recorre todas las subcarpetas dentro de carpeta_raiz y une todos los JSON en un único CSV.
+    Parámetros: carpeta_raiz (str ruta), salida_csv (str ruta archivo salida).
+    Retorna: DataFrame con datos unificados o None si hay error.
     """
     dataframes = []
     codificaciones = ["utf-8", "latin1", "windows-1252"]

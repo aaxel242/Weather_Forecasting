@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 
 def limpiar_datos(df):
-    # Limpia duplicados, comillas, normaliza columnas y convierte a tipos numéricos.
-    # Ordena cronológicamente por fecha. Parámetro: df (DataFrame). Retorna DataFrame limpio.
+    """
+    Limpia duplicados, comillas, normaliza columnas y convierte a tipos numéricos.
+    Parámetros: df (DataFrame). Retorna: DataFrame limpio y ordenado cronológicamente.
+    """
     # 1. Eliminar duplicados
     df = df.drop_duplicates()
 

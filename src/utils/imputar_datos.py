@@ -1,8 +1,10 @@
 import pandas as pd
 
 def imputar_datos(df):
-    # Imputa valores faltantes con lógica estacional para temperatura/humedad y arrastre para dirección del viento.
-    # Parámetro: df (DataFrame con NaNs). Retorna DataFrame completo sin valores nulos.
+    """
+    Imputa valores faltantes con lógica estacional para temperatura/humedad y arrastre para viento.
+    Parámetros: df (DataFrame con NaNs). Retorna: DataFrame completo sin valores nulos.
+    """
     df_imput = df.copy()
 
     # Asegurar que el índice sea datetime para que .index.month funcione

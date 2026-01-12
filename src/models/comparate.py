@@ -53,8 +53,10 @@ FEATURES = [
 ]
 
 def imprimir_metricas(y_test, y_pred, nombre_modelo):
-    # Calcula e imprime métricas de clasificación: Accuracy, Precisión, Recall, F1 y Matriz de Confusión.
-    # Parámetros: y_test (valores reales), y_pred (predicciones), nombre_modelo (etiqueta a mostrar).
+    """
+    Calcula e imprime métricas de clasificación: Accuracy, Precisión, Recall, F1.
+    Parámetros: y_test (array reales), y_pred (array predicciones), nombre_modelo (str).
+    """
     acc = accuracy_score(y_test, y_pred)
     prec = precision_score(y_test, y_pred, zero_division=0)
     rec = recall_score(y_test, y_pred, zero_division=0)
@@ -71,8 +73,10 @@ def imprimir_metricas(y_test, y_pred, nombre_modelo):
     print(f"   FN: {cm[1][0]} | TP: {cm[1][1]}")
 
 def logistic_cv_smote_grind(df):
-    # Entrena Regresión Logística con GridSearch y SMOTE para desbalance de clases.
-    # Parámetro: df (DataFrame con features y target 'bin_prep'). Retorna modelo entrenado.
+    """
+    Entrena Regresión Logística con GridSearch y SMOTE para desbalance de clases.
+    Parámetros: df (DataFrame con features y target 'bin_prep'). Retorna: modelo entrenado.
+    """
     print("\n--- Entrenando Logistic Regression con GridSearch + SMOTE ---")
 
     df_model = df[FEATURES + ['bin_prep']].copy()
@@ -119,8 +123,10 @@ def logistic_cv_smote_grind(df):
     return best_model
 
 def randomforest_cv_smote_grind(df):
-    # Entrena RandomForest con GridSearch y SMOTE para desbalance de clases.
-    # Parámetro: df (DataFrame con features y target). Retorna pipeline entrenado.
+    """
+    Entrena RandomForest con GridSearch y SMOTE para desbalance de clases.
+    Parámetros: df (DataFrame con features y target). Retorna: pipeline entrenado.
+    """
     print("\n--- Entrenando RandomForest con GridSearch ---")
 
     df_model = df[FEATURES + ['bin_prep']].copy()
@@ -163,8 +169,10 @@ def randomforest_cv_smote_grind(df):
     return pipeline_rf
 
 def smv_cv_smote_grind(df):
-    # Entrena SVM con GridSearch y SMOTE para clasificación binaria de lluvia.
-    # Parámetro: df (DataFrame con features y target). Retorna modelo entrenado con escalado.
+    """
+    Entrena SVM con GridSearch y SMOTE para clasificación binaria de lluvia.
+    Parámetros: df (DataFrame con features y target). Retorna: modelo entrenado.
+    """
     print("\n--- Entrenando SVM con GridSearch + SMOTE ---")
 
     df_model = df[FEATURES + ['bin_prep']].copy()
@@ -212,6 +220,11 @@ def smv_cv_smote_grind(df):
     return best_model
 
 def temporal_train_test_split(X, y, test_size=0.2):
+    """
+    Divide datos en train/test respetando cronología (sin mezclar).
+    Parámetros: X (DataFrame features), y (Series target), test_size (float proporción).
+    Retorna: tupla (X_train, X_test, y_train, y_test).
+    """
     split_idx = int(len(X) * (1 - test_size))
 
     X_train = X.iloc[:split_idx]

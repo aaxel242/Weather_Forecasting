@@ -1,8 +1,10 @@
 import streamlit as st
 
 def apply_custom_styles():
-    # Aplica estilos CSS personalizados globales (fondo oscuro y scrollbars personalizadas).
-    # Configura tema visual de la aplicación Streamlit.
+    """
+    Aplica estilos CSS personalizados globales (fondo oscuro y scrollbars personalizadas).
+    Parámetros: ninguno. Retorna: None (configura tema visual de Streamlit).
+    """
     st.markdown("""
     <style>
         /* FONDO GENERAL DE LA APP */

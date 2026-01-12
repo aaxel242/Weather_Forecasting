@@ -2,17 +2,9 @@ import pandas as pd
 
 def add_binari_precipitation():
     """
-    Agrega una columna binaria 'bin_prep' al DataFrame indicando si hubo precipitación.
-
-    Parámetros
-    ----------
-    df : pd.DataFrame
-        DataFrame que contiene la columna 'prec'.
-
-    Retorna
-    -------
-    pd.DataFrame
-        DataFrame con la nueva columna 'bin_prep'.
+    Agrega columna binaria 'bin_prep' indicando si hubo precipitación (1) o no (0).
+    Lee CSV procesado, crea variable binaria y guarda en CSV crudo.
+    Parámetros: ninguno. Retorna: None (guarda CSV procesado).
     """
     # Cargar el dataset
     df = pd.read_csv('src/data/processed/data_weather_oficial.csv')
@@ -25,6 +17,11 @@ def add_binari_precipitation():
     df.to_csv('src/data/raw/data_binario.csv', index=False)
 
 def add_lag_features():
+    """
+    Agrega características de lag (rezagos), estacionalidad y targets a 7 días al dataset.
+    Crea features como temperatura/precipitación del día anterior, mes, día del año, etc.
+    Parámetros: ninguno (lee archivo procesado). Retorna: None (guarda CSV final).
+    """
 
     df = pd.read_csv("src/data/processed/data_weather_final.csv")
     df = df.drop(columns=["lluvia_binaria_target"], errors="ignore")

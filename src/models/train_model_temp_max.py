@@ -12,9 +12,11 @@ RUTA_MODELO = 'src/models/modelo_tmax.joblib'
 RUTA_FEATURES = 'src/models/features_tmax.joblib'
 
 def train_tmax():
-    # Entrena un modelo RandomForest para predecir temperatura máxima diaria.
-    # Utiliza características históricas y lags (valores del día anterior).
-    # Guarda el modelo y la lista de features entrenadas.
+    """
+    Entrena modelo RandomForest para predecir temperatura máxima diaria.
+    Utiliza características históricas y lags del día anterior.
+    Parámetros: ninguno. Retorna: None (guarda modelo en disco).
+    """
     print("--- ENTRENANDO MODELO T_MAX (Con Lags y Métricas Completas) ---")
     
     # 1. Cargar Datos
@@ -77,7 +79,7 @@ def train_tmax():
     # 6. Guardado
     os.makedirs(os.path.dirname(RUTA_MODELO), exist_ok=True)
     joblib.dump(model, RUTA_MODELO)
-    joblib.dump(features, RUTA_FEATURES) # Guardamos la lista de columnas
+    joblib.dump(features, RUTA_FEATURES)
     print(f"\n Modelo guardado en: {RUTA_MODELO}")
 
 if __name__ == "__main__":

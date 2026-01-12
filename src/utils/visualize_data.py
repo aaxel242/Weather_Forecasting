@@ -7,8 +7,10 @@ import streamlit as st
 import os
 
 def visualization_Data(data):
-    # Renderiza imágenes de dashboards PowerBI y gráficos interactivos (histogramas, comparación temporal, scatter, series).
-    # Parámetro: data (DataFrame). Permite seleccionar variables dinámicamente para análisis visual.
+    """
+    Renderiza dashboards PowerBI e gráficos interactivos: histogramas, comparación temporal, scatter y series.
+    Parámetros: data (DataFrame). Retorna: None (renderiza visualizaciones en Streamlit).
+    """
 
     # Definimos la ruta de la carpeta
     image_path = "src/images/"
@@ -52,8 +54,10 @@ def visualization_Data(data):
     interactive_distribution(data)
 
 def interactive_distribution(data):
-    # Genera 4 gráficos interactivos: histograma, comparación temporal (step plot), scatter y serie temporal.
-    # Parámetro: data (DataFrame). Permite seleccionar variables numéricas para visualización dinámica.
+    """
+    Genera 4 gráficos interactivos: histograma, comparación temporal, scatter y serie temporal.
+    Parámetros: data (DataFrame). Retorna: None (renderiza gráficos con Streamlit y Matplotlib).
+    """
     
     # Preparamos las columnas numéricas
     cols_numericas = data.select_dtypes(include=[np.number]).columns.tolist()

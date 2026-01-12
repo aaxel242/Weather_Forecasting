@@ -8,8 +8,10 @@ import streamlit.components.v1 as components
 """tarjetas que giran"""
 
 def img_to_base64(path):
-    # Convierte imagen a string base64 para embeber en HTML.
-    # Parámetro: path (ruta de archivo). Retorna string base64 con esquema data:image.
+    """
+    Convierte imagen a string base64 para embeber en HTML.
+    Parámetros: path (str ruta archivo). Retorna: str base64 con esquema data:image o None.
+    """
     if not os.path.exists(path):
         return None
     try:
@@ -21,8 +23,11 @@ def img_to_base64(path):
         return None
 
 def obtener_icono_tiempo(lluvia, tmin, tmax, nubes):
-    # Selecciona icono del clima según lluvia, temperatura y nubosidad.
-    # Parámetros: lluvia (0/1), tmin, tmax, nubes. Retorna nombre de archivo PNG.
+    """
+    Selecciona icono del clima según lluvia, temperatura y nubosidad.
+    Parámetros: lluvia (int 0/1), tmin (float), tmax (float), nubes (float).
+    Retorna: str nombre archivo PNG.
+    """
     t_avg = (tmin + tmax) / 2
     if lluvia == 1:
         if t_avg < 2: return "nieve.png"
@@ -33,8 +38,11 @@ def obtener_icono_tiempo(lluvia, tmin, tmax, nubes):
     return "sol.png"
 
 def obtener_consejo(tmin, tmax, lluvia):
-    # Genera consejo personalizado sobre qué llevar y cómo vestirse según clima predicho.
-    # Parámetros: tmin, tmax, lluvia (0/1). Retorna tupla (consejo_texto, icono_nombre).
+    """
+    Genera consejo personalizado sobre qué llevar según clima predicho.
+    Parámetros: tmin (float), tmax (float), lluvia (int 0/1).
+    Retorna: tupla (str consejo, str nombre_icono).
+    """
     # 1. Prioridad absoluta: Lluvia
     if lluvia == 1: 
         if tmin < 8:
@@ -63,8 +71,11 @@ def obtener_consejo(tmin, tmax, lluvia):
         return "Hace un dia genial", "dia_agradable.png"
 
 def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
-    # Genera y renderiza tarjetas interactivas (flip-card HTML) con predicciones de 7 días.
-    # Parámetros: df (datos históricos), predicciones (tmax, tmin, rain), base_path. Renderiza componente HTML con CSS 3D.
+    """
+    Genera y renderiza tarjetas interactivas (flip-card HTML) con predicciones de 7 días.
+    Parámetros: df (DataFrame histórico), p_tmax (list), p_tmin (list), p_rain (list), base_path (str).
+    Retorna: None (renderiza componente HTML con CSS 3D).
+    """
     
     images_dir = os.path.join(base_path, 'images')
     cards_html = ""
@@ -276,8 +287,11 @@ def generar_grid_html(df, p_tmax, p_tmin, p_rain, base_path):
     components.html(full_html, height=270, scrolling=False)
 
 def obtener_todos_los_consejos(base_path):
-    # Extrae todos los consejos únicos posibles según diferentes escenarios climáticos.
-    # Parámetro: base_path. Retorna lista de diccionarios con texto e imagen en base64.
+    """
+    Extrae todos los consejos únicos posibles según diferentes escenarios climáticos.
+    Parámetros: base_path (str ruta raíz).
+    Retorna: list diccionarios con texto e imagen en base64.
+    """
     images_dir = os.path.join(base_path, 'images')
     
     # Definimos los casos basados en tu lógica de obtener_consejo
@@ -310,8 +324,11 @@ def obtener_todos_los_consejos(base_path):
 
 
 def renderizar_galeria_consejos(base_path):
-    # Renderiza galería visual de todos los consejos posibles en grid responsivo.
-    # Parámetro: base_path. Muestra tarjetas con imágenes de fondo y consejos como overlay.
+    """
+    Renderiza galería visual de todos los consejos posibles en grid responsivo.
+    Parámetros: base_path (str ruta raíz).
+    Retorna: None (muestra tarjetas con imágenes y consejos en Streamlit).
+    """
     consejos = obtener_todos_los_consejos(base_path)
     
     html_cards = ""
