@@ -90,4 +90,5 @@ def add_lag_features():
     # ============================
     df.to_csv("src/data/processed/data_weather_final.csv", index=False)
 
+# add_binari_precipitation()
 add_lag_features()

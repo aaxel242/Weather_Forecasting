@@ -25,11 +25,6 @@ def limpiar_datos(df):
         df = df.dropna(subset=["date"])
         df = df.set_index("date").sort_index()
 
-        # Asegúrate de que esto esté así en tu archivo de limpieza:
-        # df["date"] = pd.to_datetime(df["date"], errors="coerce")
-        # df = df.dropna(subset=["date"])
-        # df = df.set_index("date").sort_index() # El sort_index es clave para la línea temporal
-
     # 5. Lista de columnas que DEBEN ser numéricas (incluimos 'dir')
     cols_numericas = [
         "tmed", "prec", "tmin", "tmax", "dir",  # 'dir' ahora es numérica
