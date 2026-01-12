@@ -14,7 +14,8 @@ from src.utils.show_evaluation import show_evaluation
 st.set_page_config(page_title="Weather Forecasting", layout="wide")
 
 def render_eda_section():
-    st.title("Weather Forecasting - Data Analysis")
+    # Orquesta la sección de análisis exploratorio de datos (EDA) con 4 pestañas.
+    # Carga, limpia, imputa datos y muestra estadísticas, correlaciones, visualizaciones y evaluación de modelos.
 
     data = cargar_datos()
     

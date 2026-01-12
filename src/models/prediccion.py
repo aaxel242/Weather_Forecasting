@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 def predict_with_model(model_path_lr, model_path_rf, features, rango):
+    # Genera tarjetas de predicción para los próximos días usando modelos RandomForest y Regresión Logística.
+    # Parámetros: rutas de modelos, features (características), rango (días a predecir).
+    # Muestra pronósticos en pestañas con estadísticas resumidas.
     st.markdown("---")
     st.header(f"Predicción Meteorológica - {rango} Días")
     
@@ -215,10 +218,9 @@ def predict_with_model(model_path_lr, model_path_rf, features, rango):
 
 #  Temperatura Mínima
 def agente_meteorologico(temp_min, llueve): 
-    """
-    Lógica del Agente para dar consejos prácticos basados en 
-    la temperatura mínima y la probabilidad de lluvia.
-    """
+    # Genera recomendaciones personalizadas basadas en temperatura mínima y lluvia predicha.
+    # Parámetros: temp_min (temperatura mínima), llueve (1=lluvia, 0=seco).
+    # Retorna: consejo en texto con indicaciones de abrigo y paraguas.
     # 1. Tu lógica de abrigo (Temperatura Mínima)
     if temp_min < 8:
         consejo = "Hace mucho frio, abrigate."

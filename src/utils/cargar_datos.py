@@ -3,11 +3,8 @@ import pandas as pd
 import streamlit as st
 
 def cargar_datos():
-    """
-    Carga datos para el pipeline:
-    - Siempre usa el CSV definitivo generado a partir de los JSON base.
-    - Si el usuario sube datos adicionales, se concatenan a la base.
-    """
+    # Carga datos de CSV definitivo (data_weather_final.csv) desde carpeta processed.
+    # Permite concatenar datos adicionales si el usuario sube archivos. Retorna DataFrame.
     data = None
 
     # CSV definitivo (base)

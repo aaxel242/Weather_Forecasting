@@ -18,6 +18,7 @@ if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 # --- 3. IMPORTAR Y EJECUTAR ---
+# Importa el módulo principal del dashboard y ejecuta la interfaz de usuario.
 try:
     # Ahora sí podemos importar dashboard porque el path está configurado
     from dashboard.app import main_frontend

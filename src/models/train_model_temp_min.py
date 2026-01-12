@@ -12,6 +12,9 @@ RUTA_MODELO = 'src/models/modelo_tmin.joblib'
 RUTA_FEATURES = 'src/models/features_tmin.joblib'
 
 def train_temp_min_model():
+    # Entrena un modelo RandomForest para predecir temperatura mínima diaria.
+    # Utiliza temperaturas anteriores y características climáticas como punto de rocío y nubosidad.
+    # Guarda el modelo entrenado y lista de features usadas.
     print("\n--- ENTRENANDO MODELO T_MIN (Con Métricas Completas) ---")
     
     # 1. Cargar y Ordenar

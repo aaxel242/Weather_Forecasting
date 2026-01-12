@@ -12,10 +12,8 @@ from datetime import timedelta
 
 @st.cache_resource
 def cargar_modelos(base_path):
-    """
-    Carga los modelos .joblib y las listas de features desde la carpeta 'models'.
-    base_path: Ruta raíz del proyecto (donde está src/)
-    """
+    # Carga modelos entrenados (.joblib) y listas de features desde carpeta 'models'.
+    # Parámetro: base_path (ruta raíz del proyecto). Retorna tuplas (modelo, features) para tmax, tmin, lluvia.
     try:
         # CORRECCIÓN DE RUTA: Apuntamos directamente a 'models' dentro del base_path
         models_dir = os.path.join(base_path, 'models')
@@ -36,9 +34,8 @@ def cargar_modelos(base_path):
         return None, None, None
 
 def preparar_datos_prediccion(base_path):
-    """
-    Carga el CSV histórico completo para obtener el punto de partida (último día real).
-    """
+    # Carga CSV histórico completo para obtener el punto de partida de predicciones.
+    # Parámetro: base_path (ruta raíz). Retorna DataFrame ordenado cronológicamente.
     try:
         # CORRECCIÓN DE RUTA: Ajustamos para llegar a data/processed/
         csv_path = os.path.join(base_path, 'data', 'processed', 'data_weather_final.csv')
@@ -58,10 +55,8 @@ def preparar_datos_prediccion(base_path):
         return None
 
 def ejecutar_predicciones(df_historico, pack_tmax, pack_tmin, pack_lluvia):
-    """
-    Genera predicciones para los próximos 7 días usando lógica recursiva (Loop).
-    El output de hoy se convierte en el input de ayer para mañana.
-    """
+    # Genera predicciones recursivas para 7 días usando lógica de lags (valores predichos se convierten en inputs).
+    # Parámetros: df_historico (datos base), packs de modelos (modelo, features). Retorna listas de tmax, tmin, lluvia.
     # Desempaquetar tuplas (Modelo, Lista de Features)
     m_tmax, feats_tmax = pack_tmax
     m_tmin, feats_tmin = pack_tmin

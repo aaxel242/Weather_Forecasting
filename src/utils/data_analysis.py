@@ -1,6 +1,8 @@
 import streamlit as st
 
 def basic_stats (data):
+    # Muestra estadísticas básicas del dataset: primeras filas, descripción y métricas de calidad.
+    # Parámetro: data (DataFrame). Muestra resumen de filas, columnas, nulos y duplicados.
     st.subheader("Dataset")
     st.dataframe(data.head(100), width="stretch")
 
