@@ -144,11 +144,6 @@ def randomforest_cv_smote_grind(df):
         ('smote', SMOTE(random_state=42)),
         ('rf', RandomForestClassifier(
             random_state=42,
-            # class_weight='balanced',
-            # n_estimators=500,
-            # max_depth=8,
-            # min_samples_leaf=10,
-            # min_samples_split=5
         ))
     ])
 
@@ -218,21 +213,6 @@ def smv_cv_smote_grind(df):
     imprimir_metricas(y_test, y_pred, "SVM")
 
     return best_model
-
-def temporal_train_test_split(X, y, test_size=0.2):
-    """
-    Divide datos en train/test respetando cronología (sin mezclar).
-    Parámetros: X (DataFrame features), y (Series target), test_size (float proporción).
-    Retorna: tupla (X_train, X_test, y_train, y_test).
-    """
-    split_idx = int(len(X) * (1 - test_size))
-
-    X_train = X.iloc[:split_idx]
-    X_test  = X.iloc[split_idx:]
-    y_train = y.iloc[:split_idx]
-    y_test  = y.iloc[split_idx:]
-
-    return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
     try:
