@@ -79,3 +79,5 @@ def train_tmax():
 
 if __name__ == "__main__":
     train_tmax()
+
+    # probar a mejorar el modelo
