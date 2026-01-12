@@ -158,7 +158,7 @@ Usuario
   - `cargar_modelos()`: Carga modelos y features desde disco
   - `preparar_datos_prediccion()`: Prepara datos históricos
   - `ejecutar_predicciones()`: Loop recursivo de 7 días con lags dinámicos
-  - `eda.py`: Sección de análisis exploratorio en dashboard
+- `eda.py`: Sección de análisis exploratorio en dashboard
 
 #### 4. **Utilidades** (`src/utils/`)
 - `cargar_datos.py`: Carga CSV inicial
@@ -193,20 +193,19 @@ Usuario
   - RMSE (Raíz del Error Cuadrático Medio)
 
 ### Precipitación (Clasificación Binaria)
-- **Algoritmo**: RandomForest + SMOTE (manejo de desbalance)
+- **Algoritmo**: RandomForest + SMOTE (manejo de desbalance) + GrindSearch (mejora de prediccion)
 - **Target**: `bin_prep` (1 = lluvia, 0 = sin lluvia)
 - **Features especiales**:
   - `pressure_delta`: Cambio de presión (mejor predictor de tormentas)
+  - `pressure_yesterday`: Presion atmosférica del día anterior
   - `rain_yesterday_bin`: Lluvia el día anterior
   - Delta de presión negativo = mayor probabilidad de lluvia
 
 - **Métricas**:
   - Accuracy: ~80-85%
   - Recall: ~70-75% (detecta la mayoría de lluvias)
-  - Precision: ~75-80% (pocos falsos positivos)
-  - F1-Score: ~0.73-0.77
-
-- **Umbral Ajustado**: `predict_proba >= 0.35` (mejora Recall)
+  - Precision: ~60-65% (pocos falsos positivos)
+  - F1-Score: ~0.65-0.70
 
 ### Modelos Comparados
 Se evaluaron 3 algoritmos:
@@ -264,10 +263,10 @@ R²:      0.891
 
 ### Precipitación (Clasificación)
 ```
-Accuracy:  82.1%
-Precision: 78.3%
-Recall:    71.9%
-F1-Score:  0.751
+Accuracy:  81.2%
+Precision: 60.2%
+Recall:    72.2%
+F1-Score:  0.6567
 ```
 ---
 
@@ -386,19 +385,13 @@ Se implementó un loop de 7 días donde cada predicción usa la anterior como la
 - **Desafío**: Acumulación de errores
 - **Solución**: Uso de presión atmosférica como predictor físico principal
 
-### 2. Umbral Ajustado para Lluvia
-Después del entrenamiento, se aplicó un umbral de `predict_proba >= 0.35`:
-- **Sin umbral**: Baja detección de lluvias (bajo Recall)
-- **Con umbral**: Mejor equilibrio Precision-Recall
-- **Racional**: Mejor avisar falsa alarma que perderse una lluvia
-
-### 3. SMOTE para Desbalance
+### 2. SMOTE para Desbalance
 El dataset tiene ~20% de días lluviosos vs ~80% secos:
 - **Problema**: Modelo tendría sesgos
 - **Solución**: SMOTE sobremuestrea la clase minoritaria
 - **Pipeline**: SMOTE + RandomForest dentro de GridSearchCV
 
-### 4. Sin mezclar Train/Test
+### 3. Sin mezclar Train/Test
 Se usó `shuffle=False` en el split:
 - **Razón**: Datos son serie temporal
 - **Ventaja**: Simula predicción real (futuro desconocido)
@@ -434,18 +427,12 @@ Se usó `shuffle=False` en el split:
 - [README de datos raw](src/data/raw/README.md): Fuentes y enlaces
 
 ### Próximas Mejoras
+- [ Que nuestro modelo de precipitación nos de un resultado acorde a la realidad] 
+- [ Actualizar la BDD constantemente] 
+- [ Mejorar algunos aspectos del frontend] 
+- [ Hacerlo público a personas] 
 - [ ] 
 - [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-
----
-
-## Licencia
-
-Este proyecto está bajo licencia MIT. Ver archivo `LICENSE` para más detalles.
 
 ---
 
@@ -454,6 +441,7 @@ Este proyecto está bajo licencia MIT. Ver archivo `LICENSE` para más detalles.
 Para reportar bugs o sugerir mejoras:
 - Abre un Issue en GitHub
 - Contacta al equipo de desarrollo
+- Conectarse con un profesorado del Stucom
 
 ---
 
