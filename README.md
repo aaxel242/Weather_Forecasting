@@ -112,6 +112,16 @@ src/data/processed/
 
 ## Uso
 
+### Archivo SWF.bat
+
+```
+Enviar archvio como acceso directo al escritorio o ejecutar directamente
+Este hace:
+1.- call uv sync
+2.- call uv run python -m streamlit run src/main.py
+```
+
+
 ### Dashboard Streamlit (Recomendado)
 
 ```bash
