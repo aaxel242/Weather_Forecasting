@@ -20,3 +20,6 @@ def compilar_datos():
         st.sidebar.error("⚠️ No se pudieron compilar los datos")
 
     return df_final
+
+if __name__ == "__main__":
+        compilar_datos()
