@@ -1,6 +1,6 @@
 # 🚀 SWF STUCOM Weather Forecast
 
-![](ruta/de/la/imagen.pngC:\Users\User\Desktop\Programacion\Proyecto 3 - AI Clima\Weather_Forecasting - main\src\images\imagen_entrada.png)
+![](Weather_Forecasting - main\src\images\imagen_entrada.png)
 
 ## 📋 Grupo 2 - componentes
 * Axel Ortega
