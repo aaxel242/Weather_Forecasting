@@ -1,4 +1,4 @@
-# 🚀 SWF STUCOM Weather Forecast
+# SWF STUCOM Weather Forecast
 
 ![](src/images/imagen_entrada.png)
 
