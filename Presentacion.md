@@ -1,6 +1,6 @@
 # 🚀 SWF STUCOM Weather Forecast
 
-![](src\images\imagen_entrada.png)
+![](src/images/imagen_entrada.png)
 
 ## 📋 Grupo 2 - componentes
 * Axel Ortega
