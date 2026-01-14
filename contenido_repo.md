@@ -30,5 +30,6 @@ Weather_Forecasting/
 │   │   ├── Video
 │   │   │   ├── Proyecto 3 - clima Sub Esp.mp4
 ```
-
+En adelante: 
+- Prototipo funcional de la plataforma de predicción meteorologica 
 ---
