@@ -7,12 +7,16 @@
 * Juan Xiao Paredes
 * Julio Jose Vazquez
 
+---
+
 ## Enlace al repositorio
 puedes acceder al código fuente completo en:
 [**Repositorio oficial en GitHub**](https://github.com/aaxel242/Weather_Forecasting.git)
 
+---
 ## Ubicación de los elementos del proyecto a entregar dentro del repositorio
 
+```
 Weather_Forecasting/
 ├── Documentación Proyecto
 │   │   ├── Documentación
@@ -25,3 +29,6 @@ Weather_Forecasting/
 │   │   │   │   ├── KPI - data_weather_final.pbix
 │   │   ├── Video
 │   │   │   ├── Proyecto 3 - clima Sub Esp.mp4
+```
+
+---
